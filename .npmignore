@@ -1,0 +1,5 @@
+node_modules/*
+test/*
+.gitignore
+tsdoc.json
+tsconfig.json

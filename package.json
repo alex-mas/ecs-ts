@@ -1,6 +1,6 @@
 {
-  "name": "ecs-ts",
-  "version": "1.0.0",
+  "name": "@axc/ecs-ts",
+  "version": "0.9.0",
   "description": "",
   "main": "src/ecs.ts",
   "scripts": {
