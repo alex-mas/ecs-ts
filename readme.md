@@ -2,7 +2,7 @@
 
 # documentation
 
-[here](./docs)
+[here](https://alex-mas.github.io/ecs-ts/)
 
 
 # using from javascript
