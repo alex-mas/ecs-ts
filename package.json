@@ -1,15 +1,20 @@
 {
   "name": "@axc/ecs-ts",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "",
   "main": "src/ecs.ts",
+  "homepage": "https://github.com/alex-mas/ecs-ts",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/alex-mas/ecs-ts.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "typedoc",
     "build": "tsc"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "alex",
+  "license": "MIT",
   "devDependencies": {
     "typedoc": "^0.15.0",
     "typescript": "^3.5.3"
