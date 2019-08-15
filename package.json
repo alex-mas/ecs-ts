@@ -1,0 +1,17 @@
+{
+  "name": "ecs-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/ecs.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "typedoc",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typedoc": "^0.15.0",
+    "typescript": "^3.5.3"
+  }
+}

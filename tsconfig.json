@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                       
+    "module": "umd",                     
+    "strict": true,                           
+    "esModuleInterop": true,
+    "outDir": "bin",               
+    //No thanks
+    "experimentalDecorators": false,        
+    "emitDecoratorMetadata": false,       
+
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
