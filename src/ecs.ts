@@ -1,14 +1,16 @@
-export type Component<ComponentEnum,ComponentType, T extends object= {}> = T & {
+export type Component<ComponentEnum,ComponentType extends ComponentEnum, T extends object= {}> = T & {
     $$type: ComponentType
 }
-export type Event<EventEnum, EventType extends EventEnum,Payload extends object = {}, > = Payload & {
-    type: EventType
+export type Event<EventEnum,Type extends EventEnum,Payload extends object = {}, > = Payload & {
+    type: Type
 }
 
-export type Entity<ComponentEnum> = Component<ComponentEnum, any>[];
+export type Entity<ComponentEnum> = Component<ComponentEnum, ComponentEnum>[];
 
-export type System<ComponentEnum,EventEnum, EventType extends EventEnum ,Entities = Component<ComponentEnum, any>[], DataEntities = Component<ComponentEnum, any>[], > = {
-    execute: (entities: Entities[], dataEntities: DataEntities[], ecs: ECSAPI<EventEnum>,event: Event<EventEnum,EventType>) => void,
+export type MappedEntity<ComponentEnum> = {[key in keyof ComponentEnum]: any};
+
+export type System<ComponentEnum,EventEnum, Ev extends Event<EventEnum, any>,Entities = MappedEntity<ComponentEnum>, DataEntities = MappedEntity<ComponentEnum>> = {
+    execute: (entities: Entities[], dataEntities: DataEntities[], ecs: ECSAPI<EventEnum>,event: Ev) => void,
     eventSubscriptions: EventEnum[],
     requiredComponents: ComponentEnum[],
     requiredData: ComponentEnum[],
@@ -16,7 +18,7 @@ export type System<ComponentEnum,EventEnum, EventType extends EventEnum ,Entitie
 }
 
 export interface ECSAPI<EventEnum> {
-    dispatch: <EventType extends EventEnum, Ev extends Event<EventEnum, EventType>>(event: Ev) => void,
+    dispatch: <EventType extends EventEnum, Ev extends Event<EventEnum, any>>(event: Ev) => void,
 }
 /**
  * 
@@ -57,15 +59,28 @@ export class ECS<ComponentEnum,EventEnum> implements ECSAPI<EventEnum> {
             let entities = this.entities.filter(
                 (entity) => entity.every((c) => s.requiredComponents.indexOf(c.$$type) > -1)
             );
+            const mappedEnditites  =  entities.map(convertArrayOfComponentsToDictionary);
 
             let dataEntities = this.entities.filter(
                 (entity) => entity.every((c) => s.requiredData.indexOf(c.$$type) > -1)
             );
+            const mappedDataEntities = dataEntities.map(convertArrayOfComponentsToDictionary);
             let exec = s.execute;
-            s.execute(entities,dataEntities,this,event);
+            s.execute(mappedEnditites,mappedDataEntities,this,event);
         });
     }
 }
 
 
 
+
+
+const convertArrayOfComponentsToDictionary = <ComponentEnum>(e: Entity<ComponentEnum>): MappedEntity<ComponentEnum>=>{
+    let o: MappedEntity<ComponentEnum> = {} as any;
+    
+    e.forEach((c)=>{
+        //@ts-ignore
+        o[c.$$type] = c;
+    });
+    return o;
+};
