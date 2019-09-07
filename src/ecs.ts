@@ -57,7 +57,7 @@ export class ECS<ComponentEnum,EventEnum> implements ECSAPI<EventEnum> {
         ).sort((a, b) => b.priority - a.priority);
         systemsToExecute.forEach((s) => {
             let entities = this.entities.filter(
-                (entity) => entity.every((c) => s.requiredComponents.indexOf(c.$$type) > -1)
+                (entity) => s.requiredComponents.every((rc) => !!entity.find((c)=>c.$$type === rc))
             );
             const mappedEnditites  =  entities.map(convertArrayOfComponentsToDictionary);
 
