@@ -62,7 +62,7 @@ export class ECS<ComponentEnum,EventEnum> implements ECSAPI<EventEnum> {
             const mappedEnditites  =  entities.map(convertArrayOfComponentsToDictionary);
 
             let dataEntities = this.entities.filter(
-                (entity) => entity.every((c) => s.requiredData.indexOf(c.$$type) > -1)
+                (entity) => s.requiredData.every((rdc) => !!entity.find((c)=>c.$$type === rdc))
             );
             const mappedDataEntities = dataEntities.map(convertArrayOfComponentsToDictionary);
             let exec = s.execute;
