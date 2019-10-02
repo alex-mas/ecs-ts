@@ -1,7 +1,7 @@
 export type Component<ComponentEnum,ComponentType extends ComponentEnum, T extends object= {}> = T & {
     $$type: ComponentType
 }
-export type Event<EventEnum,Type extends EventEnum,Payload extends object = {}, > = Payload & {
+export type Event<Type,Payload extends object = {}, > = Payload & {
     type: Type
 }
 
@@ -9,8 +9,8 @@ export type Entity<ComponentEnum> = Component<ComponentEnum, ComponentEnum>[];
 
 export type MappedEntity<ComponentEnum> = {[key in keyof ComponentEnum]: any};
 
-export type System<ComponentEnum,EventEnum, Ev extends Event<EventEnum, any>,Entities = MappedEntity<ComponentEnum>, DataEntities = MappedEntity<ComponentEnum>> = {
-    execute: (entities: Entities[], dataEntities: DataEntities[], ecs: ECSAPI<EventEnum>,event: Ev) => void,
+export type System<ComponentEnum,EventEnum, E, DE, Ev = Event<EventEnum, any>> = {
+    execute:(entities: E[], dataEntities: DE[], ecs: ECSAPI<EventEnum>,event: Ev) => void,
     eventSubscriptions: EventEnum[],
     requiredComponents: ComponentEnum[],
     requiredData: ComponentEnum[],
@@ -18,7 +18,7 @@ export type System<ComponentEnum,EventEnum, Ev extends Event<EventEnum, any>,Ent
 }
 
 export interface ECSAPI<EventEnum> {
-    dispatch: <EventType extends EventEnum, Ev extends Event<EventEnum, any>>(event: Ev) => void,
+    dispatch: <EventType extends EventEnum, Ev extends Event<any>>(event: Ev) => void,
 }
 /**
  * 
@@ -50,8 +50,8 @@ export interface ECSAPI<EventEnum> {
  */
 export class ECS<ComponentEnum,EventEnum> implements ECSAPI<EventEnum> {
     entities: Entity<ComponentEnum>[] = [];
-    systems: System<ComponentEnum, EventEnum,any>[] = [];
-    dispatch = <EventType extends EventEnum, Ev extends Event<EventEnum, EventType>>(event: Ev) => {
+    systems: System<ComponentEnum, EventEnum, any, any>[] = [];
+    dispatch = <EventType extends EventEnum, Ev extends Event<EventType>>(event: Ev) => {
         const systemsToExecute = this.systems.filter(
             (system) => system.eventSubscriptions.indexOf(event.type) > -1
         ).sort((a, b) => b.priority - a.priority);
