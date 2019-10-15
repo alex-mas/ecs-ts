@@ -1,86 +1,58 @@
+
 export type Component<ComponentEnum,ComponentType extends ComponentEnum, T extends object= {}> = T & {
     $$type: ComponentType
 }
+//export type Entity<ComponentEnum> = Component<ComponentEnum, ComponentEnum>[];
+export type Entity<ComponentEnum> = {
+    [key in keyof ComponentEnum]: any
+} & {id?: string}; 
+
+
 export type Event<Type,Payload extends object = {}, > = Payload & {
     type: Type
 }
 
-export type Entity<ComponentEnum> = Component<ComponentEnum, ComponentEnum>[];
+export type System<ComponentEnum, EventEnum,Ev > = (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>) => void
 
-export type MappedEntity<ComponentEnum> = {[key in keyof ComponentEnum]: any};
-
-export type System<ComponentEnum,EventEnum, E, DE, Ev = Event<EventEnum, any>> = {
-    execute:(entities: E[], dataEntities: DE[], ecs: ECSAPI<EventEnum>,event: Ev) => void,
-    eventSubscriptions: EventEnum[],
-    requiredComponents: ComponentEnum[],
-    requiredData: ComponentEnum[],
+export type RegisteredSystem<ComponentEnum,EventEnum, Ev = Event<EventEnum, any>> = {
+    execute:System<ComponentEnum,EventEnum,Ev>,
+    eventSubscription: EventEnum,
     priority: number
 }
 
-export interface ECSAPI<EventEnum> {
-    dispatch: <EventType extends EventEnum, Ev extends Event<any>>(event: Ev) => void,
-}
-/**
- * 
- * @usage 
- *  Simply instantiate an ECS with your custom enumerations, and push systems and entities to it
- * 
- * @example
- * 
- * enum EventType{
- *  PERIODIC = "periodic"
- * }
- * 
- * enum ComponentType{
- *    HEALTH = "health",
- *    MOVEMENT = "movement"
- *  
- * }
- * 
- * const ecs = new ECS<ComponentType, EventType>();
- * 
- * ecs.systems.push(movementSystem);
- * 
- * ecs.dispatch({
- *  type: EventType.PERIODIC,
- *  dt: 1000/60
- * })
- * 
- * 
- */
-export class ECS<ComponentEnum,EventEnum> implements ECSAPI<EventEnum> {
+export class World<ComponentEnum, EventEnum> {
     entities: Entity<ComponentEnum>[] = [];
-    systems: System<ComponentEnum, EventEnum, any, any>[] = [];
-    dispatch = <EventType extends EventEnum, Ev extends Event<EventType>>(event: Ev) => {
+    systems: RegisteredSystem<ComponentEnum, EventEnum, any>[] = [];
+    registerSystem = <Ev extends EventEnum>(sys: System<ComponentEnum,EventEnum,any>, event: Ev, priority: number)=>{
+        const registeredSystem = {
+            priority,
+            execute: sys,
+            eventSubscription: event
+        };
+        this.systems.push(registeredSystem);
+        return registeredSystem;
+    }
+    dispatch = <EventType extends EventEnum, Ev extends Event<EventType>>(event: Ev)=>{
         const systemsToExecute = this.systems.filter(
-            (system) => system.eventSubscriptions.indexOf(event.type) > -1
+            (system) => system.eventSubscription === event.type
         ).sort((a, b) => b.priority - a.priority);
         systemsToExecute.forEach((s) => {
-            let entities = this.entities.filter(
-                (entity) => s.requiredComponents.every((rc) => !!entity.find((c)=>c.$$type === rc))
-            );
-            const mappedEnditites  =  entities.map(convertArrayOfComponentsToDictionary);
-
-            let dataEntities = this.entities.filter(
-                (entity) => s.requiredData.every((rdc) => !!entity.find((c)=>c.$$type === rdc))
-            );
-            const mappedDataEntities = dataEntities.map(convertArrayOfComponentsToDictionary);
-            let exec = s.execute;
-            s.execute(mappedEnditites,mappedDataEntities,this,event);
+            s.execute(this.entities,event,this);
         });
+        return this;
     }
 }
 
 
+export const filterEntitiesByComponents = <ComponentEnum = any>(entities: Entity<ComponentEnum>[], requiredComponents: ComponentEnum[])=>{
+    return entities.filter(
+        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as ComponentEnum[]).find((k)=>k === rc))
+    );
+}
 
-
-
-const convertArrayOfComponentsToDictionary = <ComponentEnum>(e: Entity<ComponentEnum>): MappedEntity<ComponentEnum>=>{
-    let o: MappedEntity<ComponentEnum> = {} as any;
-    
-    e.forEach((c)=>{
-        //@ts-ignore
-        o[c.$$type] = c;
-    });
-    return o;
-};
+export const regularSystem = <ComponentEnum,EventEnum,Ev>(sys: System<ComponentEnum, EventEnum, Ev>, requiredComponents: ComponentEnum[]): System<ComponentEnum,EventEnum,Ev>=>{
+    return (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>)=>{
+        const relevantEntities = filterEntitiesByComponents(entities,requiredComponents);
+        sys(relevantEntities,event,world);
+    }
+}

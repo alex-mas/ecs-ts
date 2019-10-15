@@ -1,8 +1,6 @@
 
-## 0.10.0 Changes
 
-### Breaking Changes
-- System signature changed,
-    - The entities are dictionaries where each componentType is a key.
-    - The second event generic parameter is the event itself
-
+## 0.11.0 Changes
+- Renamed ECS to World
+- Istead of pre-assembling a system user now passes the system, its priority and the event it subscribes to to the addSystem method
+- Changed type signatures to require less generic arguments
