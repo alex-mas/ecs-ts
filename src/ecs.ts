@@ -1,29 +1,27 @@
-
 export type Component<ComponentEnum,ComponentType extends ComponentEnum, T extends object= {}> = T & {
     $$type: ComponentType
 }
-//export type Entity<ComponentEnum> = Component<ComponentEnum, ComponentEnum>[];
-export type Entity<ComponentEnum> = {
-    [key in keyof ComponentEnum]: any
-} & {id?: string}; 
 
+export type Entity<ComponentEnum extends string | number | symbol> = {
+    [key in ComponentEnum]: any
+} & {id?: string}; 
 
 export type Event<Type,Payload extends object = {}, > = Payload & {
     type: Type
 }
 
-export type System<ComponentEnum, EventEnum,Ev > = (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>) => void
+export type System<ComponentEnum extends string, EventEnum,Ev > = (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>) => void
 
-export type RegisteredSystem<ComponentEnum,EventEnum, Ev = Event<EventEnum, any>> = {
+export type RegisteredSystem<ComponentEnum extends string,EventEnum, Ev = Event<EventEnum, any>> = {
     execute:System<ComponentEnum,EventEnum,Ev>,
     eventSubscription: EventEnum,
     priority: number
 }
 
-export class World<ComponentEnum, EventEnum> {
+export class World<ComponentEnum extends string, EventEnum> {
     entities: Entity<ComponentEnum>[] = [];
     systems: RegisteredSystem<ComponentEnum, EventEnum, any>[] = [];
-    registerSystem = <Ev extends EventEnum>(sys: System<ComponentEnum,EventEnum,any>, event: Ev, priority: number)=>{
+    registerSystem = <Ev extends EventEnum>(sys: System<ComponentEnum,EventEnum,any>, event: Ev, priority: number = 1)=>{
         const registeredSystem = {
             priority,
             execute: sys,
@@ -32,7 +30,7 @@ export class World<ComponentEnum, EventEnum> {
         this.systems.push(registeredSystem);
         return registeredSystem;
     }
-    dispatch = <EventType extends EventEnum, Ev extends Event<EventType>>(event: Ev)=>{
+    dispatch = <Ev extends Event<EventEnum, any>>(event: Ev)=>{
         const systemsToExecute = this.systems.filter(
             (system) => system.eventSubscription === event.type
         ).sort((a, b) => b.priority - a.priority);
@@ -43,14 +41,13 @@ export class World<ComponentEnum, EventEnum> {
     }
 }
 
-
-export const filterEntitiesByComponents = <ComponentEnum = any>(entities: Entity<ComponentEnum>[], requiredComponents: ComponentEnum[])=>{
+export const filterEntitiesByComponents = <ComponentEnum  extends string= any>(entities: Entity<ComponentEnum>[], requiredComponents: ComponentEnum[])=>{
     return entities.filter(
         (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as ComponentEnum[]).find((k)=>k === rc))
     );
 }
 
-export const regularSystem = <ComponentEnum,EventEnum,Ev>(sys: System<ComponentEnum, EventEnum, Ev>, requiredComponents: ComponentEnum[]): System<ComponentEnum,EventEnum,Ev>=>{
+export const regularSystem = <Ev extends Event<EventEnum, any> = {},EventEnum = any,ComponentEnum extends string = any,>(sys: System<ComponentEnum, EventEnum, Ev>, requiredComponents: ComponentEnum[]): System<ComponentEnum,EventEnum,Ev>=>{
     return (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>)=>{
         const relevantEntities = filterEntitiesByComponents(entities,requiredComponents);
         sys(relevantEntities,event,world);
