@@ -1,6 +1,6 @@
 {
   "name": "@axc/ecs-ts",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "",
   "main": "bin/ecs.js",
   "homepage": "https://github.com/alex-mas/ecs-ts",
@@ -19,5 +19,6 @@
   "devDependencies": {
     "typedoc": "^0.15.0",
     "typescript": "^3.6.2"
-  }
+  },
+  "keywords": ["ecs", "typescript", "entity component system", "functional", "entity", "component", "system"]
 }
