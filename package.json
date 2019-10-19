@@ -20,5 +20,13 @@
     "typedoc": "^0.15.0",
     "typescript": "^3.6.2"
   },
-  "keywords": ["ecs", "typescript", "entity component system", "functional", "entity", "component", "system"]
+  "keywords": [
+    "ecs",
+    "typescript",
+    "entity component system",
+    "functional",
+    "entity",
+    "component",
+    "system"
+  ]
 }

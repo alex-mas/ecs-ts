@@ -19,9 +19,9 @@ export type RegisteredSystem<ComponentEnum extends string,EventEnum, Ev = Event<
 }
 
 export class World<ComponentEnum extends string, EventEnum> {
-    entities: Entity<ComponentEnum>[] = [];
-    systems: RegisteredSystem<ComponentEnum, EventEnum, any>[] = [];
-    registerSystem = <Ev extends EventEnum>(sys: System<ComponentEnum,EventEnum,any>, event: Ev, priority: number = 1)=>{
+    entities: Entity<any>[] = [];
+    systems: RegisteredSystem<any, EventEnum, any>[] = [];
+    registerSystem = <Ev extends EventEnum,Cp extends ComponentEnum>(sys: System<Cp,EventEnum,any>, event: Ev, priority: number = 1)=>{
         const registeredSystem = {
             priority,
             execute: sys,
