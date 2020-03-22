@@ -3,7 +3,9 @@ import { createAttackComponent } from "../components/attack";
 import { ComponentType } from "../components/componentType";
 import { Entity } from "../../../src/ecs";
 
-export const createDummy = (id: string,healthAmmount: number, attackAmmount: number): Entity<ComponentType.ATTACK | ComponentType.HEALTH>=>{
+
+
+export const createDummy = (id: string,healthAmmount: number, attackAmmount: number)=>{
     const health = createHealthComponent(healthAmmount, healthAmmount);
     const attack = createAttackComponent(attackAmmount, 1000);
     return {
@@ -12,7 +14,6 @@ export const createDummy = (id: string,healthAmmount: number, attackAmmount: num
         attack
     }
 }
-
 
 const t = createDummy('1',10,10);
 

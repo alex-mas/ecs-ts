@@ -4,7 +4,7 @@ export type Component<ComponentEnum,ComponentType extends ComponentEnum, T exten
 
 export type Entity<ComponentEnum extends string | number | symbol> = {
     [key in ComponentEnum]: any
-} & {id?: string}; 
+} & {id: string}; 
 
 export type Event<Type,Payload extends object = {}, > = Payload & {
     type: Type
@@ -40,6 +40,7 @@ export class World<ComponentEnum extends string, EventEnum> {
         return this;
     }
 }
+
 
 export const filterEntitiesByComponents = <ComponentEnum  extends string= any>(entities: Entity<ComponentEnum>[], requiredComponents: ComponentEnum[])=>{
     return entities.filter(

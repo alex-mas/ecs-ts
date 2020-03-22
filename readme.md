@@ -1,7 +1,6 @@
 # About
 
 ecs-ts is 50 loc library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system)
-It aims to provide a simple and functional api.
 
 # Getting Started
 
@@ -10,13 +9,14 @@ Install the package via npm
 npm install @axc/ecs-ts
 ```
 
-And start writing your components and systems. 
+## A simple demo
 ```js
 import {World} from '@axc/ecs-ts';
 
 const world = new World();
 
 const yourEntity = {
+    id: '1',
     foo: 'World!'
 }
 world.entities.push(yourEntity);
@@ -28,6 +28,8 @@ world.registerSystem((entities, event,world)=>{
         }
     }
 },'periodic', 1);
+
+world.dispatch({type: 'periodic',dt: 1000/60});
 
 ```
 
@@ -70,8 +72,12 @@ const system = (entities, event, world)=>{
         //do some work
     }
 }
-//later 
+//make the ecs world aware of the system
 world.registerSystem(system,'periodic');
+
+//triggers all systems registered to the 'periodic' event
+world.dispatch({type: 'periodic',dt: 1000/60});
+
 ```
 
 Common System operations can be abstarcted via Higher Order Functions, for example, a common use case is to only iterate on entites that have a set of components, that can be achieved by the utility function provided by this library
@@ -101,5 +107,5 @@ world.registerSystem(yourSystem,'periodic');
 
 
 # API Documentation
-You can see the generated documentation [here](https://alex-mas.github.io/ecs-ts/modules/_ecs_.html)
+You can see the automatically generated documentation [here](https://alex-mas.github.io/ecs-ts/modules/_ecs_.html)
 

@@ -7,3 +7,6 @@
 
 ## 0.12.0 Changes
 - Simplified the generics api
+
+## 0.12.3 Changes
+- Id is no longer an optional property of an entity
