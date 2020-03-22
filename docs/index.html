@@ -67,19 +67,21 @@
 				<a href="#about" id="about" style="color: inherit; text-decoration: none;">
 					<h1>About</h1>
 				</a>
-				<p>ecs-ts is 50 loc library that provides utilities to build <a href="https://en.wikipedia.org/wiki/Entity_component_system">entity component systems</a>
-				It aims to provide a simple and functional api.</p>
+				<p>ecs-ts is 50 loc library that provides utilities to build <a href="https://en.wikipedia.org/wiki/Entity_component_system">entity component systems</a></p>
 				<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
 					<h1>Getting Started</h1>
 				</a>
 				<p>Install the package via npm</p>
 				<pre><code class="language-sh">npm install @axc/ecs-ts</code></pre>
-				<p>And start writing your components and systems. </p>
+				<a href="#a-simple-demo" id="a-simple-demo" style="color: inherit; text-decoration: none;">
+					<h2>A simple demo</h2>
+				</a>
 				<pre><code class="language-js"><span class="hljs-keyword">import</span> {World} <span class="hljs-keyword">from</span> <span class="hljs-string">'@axc/ecs-ts'</span>;
 
 <span class="hljs-keyword">const</span> world = <span class="hljs-keyword">new</span> World();
 
 <span class="hljs-keyword">const</span> yourEntity = {
+    <span class="hljs-attr">id</span>: <span class="hljs-string">'1'</span>,
     <span class="hljs-attr">foo</span>: <span class="hljs-string">'World!'</span>
 }
 world.entities.push(yourEntity);
@@ -91,6 +93,8 @@ world.registerSystem(<span class="hljs-function">(<span class="hljs-params">enti
         }
     }
 },<span class="hljs-string">'periodic'</span>, <span class="hljs-number">1</span>);
+
+world.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'periodic'</span>,<span class="hljs-attr">dt</span>: <span class="hljs-number">1000</span>/<span class="hljs-number">60</span>});
 </code></pre>
 				<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
 					<h1>Documentation</h1>
@@ -126,8 +130,12 @@ world.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'
         <span class="hljs-comment">//do some work</span>
     }
 }
-<span class="hljs-comment">//later </span>
-world.registerSystem(system,<span class="hljs-string">'periodic'</span>);</code></pre>
+<span class="hljs-comment">//make the ecs world aware of the system</span>
+world.registerSystem(system,<span class="hljs-string">'periodic'</span>);
+
+<span class="hljs-comment">//triggers all systems registered to the 'periodic' event</span>
+world.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'periodic'</span>,<span class="hljs-attr">dt</span>: <span class="hljs-number">1000</span>/<span class="hljs-number">60</span>});
+</code></pre>
 				<p>Common System operations can be abstarcted via Higher Order Functions, for example, a common use case is to only iterate on entites that have a set of components, that can be achieved by the utility function provided by this library
 				This can be implemented easily as follows</p>
 				<pre><code class="language-js"><span class="hljs-keyword">const</span> regularSystem = <span class="hljs-function">(<span class="hljs-params">system, components</span>)=&gt;</span>{
@@ -150,7 +158,7 @@ world.registerSystem(yourSystem,<span class="hljs-string">'periodic'</span>);</c
 				<a href="#api-documentation" id="api-documentation" style="color: inherit; text-decoration: none;">
 					<h1>API Documentation</h1>
 				</a>
-				<p>You can see the generated documentation <a href="https://alex-mas.github.io/ecs-ts/modules/_ecs_.html">here</a></p>
+				<p>You can see the automatically generated documentation <a href="https://alex-mas.github.io/ecs-ts/modules/_ecs_.html">here</a></p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

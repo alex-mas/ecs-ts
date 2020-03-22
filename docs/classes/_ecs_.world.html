@@ -114,20 +114,20 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="entities" class="tsd-anchor"></a>
 					<h3>entities</h3>
-					<div class="tsd-signature tsd-kind-icon">entities<span class="tsd-signature-symbol">:</span> <a href="../modules/_ecs_.html#entity" class="tsd-signature-type">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ComponentEnum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
+					<div class="tsd-signature tsd-kind-icon">entities<span class="tsd-signature-symbol">:</span> <a href="../modules/_ecs_.html#entity" class="tsd-signature-type">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/e65799e/src/ecs.ts#L22">ecs.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/1b905b6/src/ecs.ts#L22">ecs.ts:22</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="systems" class="tsd-anchor"></a>
 					<h3>systems</h3>
-					<div class="tsd-signature tsd-kind-icon">systems<span class="tsd-signature-symbol">:</span> <a href="../modules/_ecs_.html#registeredsystem" class="tsd-signature-type">RegisteredSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ComponentEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
+					<div class="tsd-signature tsd-kind-icon">systems<span class="tsd-signature-symbol">:</span> <a href="../modules/_ecs_.html#registeredsystem" class="tsd-signature-type">RegisteredSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/e65799e/src/ecs.ts#L23">ecs.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/1b905b6/src/ecs.ts#L23">ecs.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -144,7 +144,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/e65799e/src/ecs.ts#L33">ecs.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/1b905b6/src/ecs.ts#L33">ecs.ts:33</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -167,13 +167,13 @@
 					<a name="registersystem" class="tsd-anchor"></a>
 					<h3>register<wbr>System</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">register<wbr>System&lt;Ev&gt;<span class="tsd-signature-symbol">(</span>sys<span class="tsd-signature-symbol">: </span><a href="../modules/_ecs_.html#system" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ComponentEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ev</span>, priority<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span></li>
+						<li class="tsd-signature tsd-kind-icon">register<wbr>System&lt;Ev, Cp&gt;<span class="tsd-signature-symbol">(</span>sys<span class="tsd-signature-symbol">: </span><a href="../modules/_ecs_.html#system" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Cp</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ev</span>, priority<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/e65799e/src/ecs.ts#L24">ecs.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/1b905b6/src/ecs.ts#L24">ecs.ts:24</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -181,11 +181,14 @@
 								<li>
 									<h4>Ev<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventEnum</span></h4>
 								</li>
+								<li>
+									<h4>Cp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ComponentEnum</span></h4>
+								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>sys: <a href="../modules/_ecs_.html#system" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ComponentEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>sys: <a href="../modules/_ecs_.html#system" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Cp</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EventEnum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
 									<h5>event: <span class="tsd-signature-type">Ev</span></h5>
