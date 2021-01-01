@@ -17,8 +17,8 @@
   "author": "alex",
   "license": "MIT",
   "devDependencies": {
-    "typedoc": "^0.15.0",
-    "typescript": "^3.6.2"
+    "typedoc": "^0.17.7",
+    "typescript": "^3.9.5"
   },
   "keywords": [
     "ecs",
