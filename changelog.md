@@ -10,3 +10,11 @@
 
 ## 0.12.3 Changes
 - Id is no longer an optional property of an entity
+
+## 0.12.4 Changes
+- Improve types
+
+## 0.12.5 Changes
+- Event propagation can now be stopped by setting the event.stopped to true
+- Update dependencies
+- Improve documentation

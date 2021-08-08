@@ -1,6 +1,6 @@
 # About
 
-ecs-ts is 50 loc library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system)
+ecs-ts is 60 loc library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system) 
 
 # Getting Started
 
@@ -35,20 +35,7 @@ world.dispatch({type: 'periodic',dt: 1000/60});
 
 # Documentation
 
-## World
 
-The world holds all the data required for a simulation to run, that is, the entities and the systems. On top of that, its api allows you to dispatch events that are listened by your systems.
-
-```js
-import {World} from '@axc/ecs-ts';
-
-const world = new World();
-
-world.registerSystem(yourSystem,'periodic');
-
-world.dispatch({type: 'periodic' dt: 1000/60});
-
-```
 ## Entity
 
 An entity is a dictionary that holds an id and component data
@@ -72,11 +59,6 @@ const system = (entities, event, world)=>{
         //do some work
     }
 }
-//make the ecs world aware of the system
-world.registerSystem(system,'periodic');
-
-//triggers all systems registered to the 'periodic' event
-world.dispatch({type: 'periodic',dt: 1000/60});
 
 ```
 
@@ -100,10 +82,22 @@ const physicsSystem = regularSystem((entities, event, world)=>{
         phsyicsEngine.update(entity);
     }
 }, ['body']);
-//later 
-world.registerSystem(yourSystem,'periodic');
 ```
 
+## World
+
+The world holds all the data required for a simulation to run, that is, the entities and the systems. On top of that, its api allows you to dispatch events that are listened by your systems.
+
+```js
+import {World} from '@axc/ecs-ts';
+
+const world = new World();
+
+world.registerSystem(yourSystem,'periodic');
+
+world.dispatch({type: 'periodic' dt: 1000/60});
+
+```
 
 
 # API Documentation

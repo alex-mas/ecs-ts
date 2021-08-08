@@ -7,7 +7,8 @@ export type Entity<ComponentEnum extends string | number | symbol> = {
 } & {id: string}; 
 
 export type Event<Type,Payload extends object = {}, > = Payload & {
-    type: Type
+    type: Type,
+    stopped: boolean
 }
 
 export type System<ComponentEnum extends string, EventEnum,Ev > = (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>) => void
@@ -35,7 +36,9 @@ export class World<ComponentEnum extends string, EventEnum> {
             (system) => system.eventSubscription === event.type
         ).sort((a, b) => b.priority - a.priority);
         systemsToExecute.forEach((s) => {
-            s.execute(this.entities,event,this);
+            if(!event.stopped){
+                s.execute(this.entities,event,this);
+            }
         });
         return this;
     }
