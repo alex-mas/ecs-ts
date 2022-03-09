@@ -6,7 +6,7 @@ export type Entity<Payload extends object = {}> = Payload & { id: string };
 
 export type Event<Payload extends object = any> = Payload & {
     type: string,
-    stopped: boolean
+    stopped?: boolean
 }
 
 export type System<Ev extends Event, EPayload extends object = {}> = (entities: Entity<EPayload>[], event: Ev, world: World) => void
@@ -20,19 +20,19 @@ export type RegisteredSystem<Ev extends Event = Event<any>> = {
 export class World<EntityPayloads extends object = any> {
     entities: Entity<EntityPayloads>[] = [];
     systems: RegisteredSystem<any>[] = [];
-    registerSystem = <Ev extends Event>(sys: System<Ev>, event: string, priority: number = 1) => {
+    registerSystem = <Ev extends Event>(sys: System<Ev, EntityPayloads>, event: string, priority: number = 1) => {
         const registeredSystem = {
             priority,
             execute: sys,
             eventSubscription: event
         };
         this.systems.push(registeredSystem);
-        return registeredSystem;
+        return this;
     }
     createEventChain = (event: string) => {
         const systems: RegisteredSystem<any>[] = [];
         const chainCreator = {
-            addSystem: <Ev extends Event>(sys: System<Ev>) => {
+            addSystem: <Ev extends Event>(sys: System<Ev,EntityPayloads>) => {
                 systems.push({
                     priority: systems.length,
                     execute: sys,
@@ -43,6 +43,7 @@ export class World<EntityPayloads extends object = any> {
             },
             register: () => {
                 systems.forEach((s) => s.priority = systems.length - s.priority);
+                this.systems = this.systems.concat(systems);
             }
         };
         return chainCreator;
@@ -56,6 +57,11 @@ export class World<EntityPayloads extends object = any> {
                 s.execute(this.entities, event, this);
             }
         });
+        return this;
+    }
+    clear = ()=>{
+        this.systems = [];
+        this.entities = [];
         return this;
     }
 }

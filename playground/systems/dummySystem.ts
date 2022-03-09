@@ -1,4 +1,4 @@
-import { regularSystem, Entity, filterEntitiesByComponents, World } from "../../../src/ecs";
+import { regularSystem, Entity, filterEntitiesByComponents, World } from "../../src/ecs";
 import { ComponentType } from "../components/componentType";
 import { EventType } from "../eventType";
 import { PeriodicEvent } from "../periodicEvent";

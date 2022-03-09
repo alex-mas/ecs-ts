@@ -1,5 +1,5 @@
 import { ComponentType } from "./componentType"
-import {Component} from '../../../src/ecs';
+import {Component} from '../../src/ecs';
 import { EventType } from "../eventType";
 
 export interface HealthComponentData {

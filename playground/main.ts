@@ -1,8 +1,8 @@
-import { World } from '../../src/ecs';
 import { createDummy } from './entities/dummy';
 import { ComponentType } from './components/componentType';
 import { EventType } from './eventType';
 import { dummySystem } from './systems/dummySystem';
+import { World } from '../src/ecs';
 
 const world: World = new World();
 
