@@ -14,6 +14,6 @@ export const createDummy = (id: string,healthAmmount: number, attackAmmount: num
         attack
     }
 }
-
+export type DummyType = ReturnType<typeof createDummy>;
 const t = createDummy('1',10,10);
 

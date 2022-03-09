@@ -6,7 +6,6 @@ export interface AttackComponentData {
     amount: number,
     speed: number
 }
-export type AttackComponent = Component<ComponentType,ComponentType.ATTACK, AttackComponentData>;
 
 export const createAttackComponent = (ammount: number, speed: number)=>{
     return {
@@ -15,3 +14,4 @@ export const createAttackComponent = (ammount: number, speed: number)=>{
         speed
     }
 }
+export type AttackComponent = ReturnType<typeof createAttackComponent>;

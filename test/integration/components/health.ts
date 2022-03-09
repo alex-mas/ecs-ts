@@ -6,7 +6,6 @@ export interface HealthComponentData {
     maximum: number,
     current: number
 }
-export type HealthComponent = Component<ComponentType,ComponentType.HEALTH, HealthComponentData>;
 
 export const createHealthComponent = (initial: number, maximum: number)=>{
     return {
@@ -15,3 +14,5 @@ export const createHealthComponent = (initial: number, maximum: number)=>{
         maximum
     }
 }
+
+export type HealthComponent = ReturnType<typeof createHealthComponent>;

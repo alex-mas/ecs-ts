@@ -1,28 +1,26 @@
-export type Component<ComponentEnum,ComponentType extends ComponentEnum, T extends object= {}> = T & {
-    $$type: ComponentType
+export type Component<Payload extends object = {}> = Payload & {
+    $$type: string
 }
 
-export type Entity<ComponentEnum extends string | number | symbol> = {
-    [key in ComponentEnum]: any
-} & {id: string}; 
+export type Entity<Payload extends object = {}> = Payload & { id: string };
 
-export type Event<Type,Payload extends object = {}, > = Payload & {
-    type: Type,
+export type Event<Payload extends object = any> = Payload & {
+    type: string,
     stopped: boolean
 }
 
-export type System<ComponentEnum extends string, EventEnum,Ev > = (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>) => void
+export type System<Ev extends Event,EPayload extends object = {}> = (entities: Entity<EPayload>[], event: Ev, world: World) => void
 
-export type RegisteredSystem<ComponentEnum extends string,EventEnum, Ev = Event<EventEnum, any>> = {
-    execute:System<ComponentEnum,EventEnum,Ev>,
-    eventSubscription: EventEnum,
+export type RegisteredSystem<Ev extends Event = Event<any>> = {
+    execute: System<Ev, any>,
+    eventSubscription: string,
     priority: number
 }
 
-export class World<ComponentEnum extends string, EventEnum> {
-    entities: Entity<ComponentEnum>[] = [];
-    systems: RegisteredSystem<any, EventEnum, any>[] = [];
-    registerSystem = <Ev extends EventEnum,Cp extends ComponentEnum>(sys: System<Cp,EventEnum,any>, event: Ev, priority: number = 1)=>{
+export class World<EntityPayloads extends object = any> {
+    entities: Entity<EntityPayloads>[] = [];
+    systems: RegisteredSystem<any>[] = [];
+    registerSystem = <Ev extends Event>(sys: System<Ev>, event: string, priority: number = 1) => {
         const registeredSystem = {
             priority,
             execute: sys,
@@ -31,13 +29,31 @@ export class World<ComponentEnum extends string, EventEnum> {
         this.systems.push(registeredSystem);
         return registeredSystem;
     }
-    dispatch = <Ev extends Event<EventEnum, {}>>(event: Ev)=>{
+    createEventChain =(event: string) => {
+        const systems:RegisteredSystem<any>[] = [];
+        const chainCreator = {
+            addSystem: <Ev extends Event>(sys: System<Ev>) => {
+                systems.push({
+                    priority: systems.length,
+                    execute: sys,
+                    eventSubscription: event
+
+                });
+                return chainCreator;
+            },
+            register: ()=>{
+                systems.forEach((s)=>s.priority = systems.length - s.priority);
+            }
+        };
+        return chainCreator;
+    }
+    dispatch = <Ev extends Event<{}>>(event: Ev) => {
         const systemsToExecute = this.systems.filter(
             (system) => system.eventSubscription === event.type
         ).sort((a, b) => b.priority - a.priority);
         systemsToExecute.forEach((s) => {
-            if(!event.stopped){
-                s.execute(this.entities,event,this);
+            if (!event.stopped) {
+                s.execute(this.entities, event, this);
             }
         });
         return this;
@@ -45,15 +61,15 @@ export class World<ComponentEnum extends string, EventEnum> {
 }
 
 
-export const filterEntitiesByComponents = <ComponentEnumValue extends string= any>(entities: Entity<any>[], requiredComponents: ComponentEnumValue[]): Entity<ComponentEnumValue>[]=>{
+export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>[] => {
     return entities.filter(
-        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as ComponentEnumValue[]).find((k)=>k === rc))
-    ) as Entity<ComponentEnumValue>[];
+        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as T).find((k) => k === rc))
+    ) as Entity<{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>[];
 }
 
-export const regularSystem = <Ev extends Event<EventEnum, any> = {},EventEnum = any,ComponentEnum extends string = any,>(sys: System<ComponentEnum, EventEnum, Ev>, requiredComponents: ComponentEnum[]): System<ComponentEnum,EventEnum,Ev>=>{
-    return (entities: Entity<ComponentEnum>[],event: Ev,world: World<ComponentEnum,EventEnum>)=>{
-        const relevantEntities = filterEntitiesByComponents(entities,requiredComponents);
-        sys(relevantEntities,event,world);
+export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>>(sys: System<Ev,{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>, requiredComponents: T) => {
+    return (entities: Entity[], event: Ev, world: World) => {
+        const relevantEntities = filterEntitiesByComponents(entities, requiredComponents);
+        sys(relevantEntities, event, world);
     }
 }
