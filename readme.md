@@ -100,8 +100,8 @@ world.dispatch({type: 'periodic',dt: 1000/60});
 ```
 
 
-# API Documentation
-You can see the automatically generated documentation [here](https://alex-mas.github.io/ecs-ts/modules/_ecs_.html)
+# Documentation
+You can see the automatically generated documentation [here](https://alex-mas.github.io/ecs-ts/)
 
 
 
