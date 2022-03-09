@@ -116,6 +116,6 @@ While the dispatching of events is built into the world, you have two options:
 
 In the end both ways allow for intercepting and modifying the events, for example, an armor systems that detects damage events and reduces its amount.
 
-## Compponent complexity
+## Component complexity
 
 Try to minimize the complexity of the components, chances are that if a component is getting complex it could be better represented as a set an entity and its features broken into their own components. In the end this will result in more flexibility and easier code to read/maintain.
