@@ -9,7 +9,7 @@ export type Event<Payload extends object = any> = Payload & {
     stopped: boolean
 }
 
-export type System<Ev extends Event,EPayload extends object = {}> = (entities: Entity<EPayload>[], event: Ev, world: World) => void
+export type System<Ev extends Event, EPayload extends object = {}> = (entities: Entity<EPayload>[], event: Ev, world: World) => void
 
 export type RegisteredSystem<Ev extends Event = Event<any>> = {
     execute: System<Ev, any>,
@@ -29,8 +29,8 @@ export class World<EntityPayloads extends object = any> {
         this.systems.push(registeredSystem);
         return registeredSystem;
     }
-    createEventChain =(event: string) => {
-        const systems:RegisteredSystem<any>[] = [];
+    createEventChain = (event: string) => {
+        const systems: RegisteredSystem<any>[] = [];
         const chainCreator = {
             addSystem: <Ev extends Event>(sys: System<Ev>) => {
                 systems.push({
@@ -41,8 +41,8 @@ export class World<EntityPayloads extends object = any> {
                 });
                 return chainCreator;
             },
-            register: ()=>{
-                systems.forEach((s)=>s.priority = systems.length - s.priority);
+            register: () => {
+                systems.forEach((s) => s.priority = systems.length - s.priority);
             }
         };
         return chainCreator;
@@ -61,13 +61,28 @@ export class World<EntityPayloads extends object = any> {
 }
 
 
-export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>[] => {
+/*
+Returns a subset of entities that ensures that components with matching types to each of the value of 
+requiredComponents can be found on the entity.
+*/
+export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
     return entities.filter(
-        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as T).find((k) => k === rc))
-    ) as Entity<{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>[];
+        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find((k,c)=>(k as Component<any>)[1].$$type == rc))
+    ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
 }
 
-export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>>(sys: System<Ev,{[K in (T extends ReadonlyArray<infer U> ? U : never)]: any}>, requiredComponents: T) => {
+
+/*
+Returns a subset of entities that have the specified strings as keys. (Assumes the component type can be deduced from the key of the entity)
+*/
+export const filterEntitiesByKeys= <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
+    return entities.filter(
+        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as T).find((k) => k === rc))
+    ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
+}
+
+
+export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>>(sys: System<Ev, { [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>, requiredComponents: T) => {
     return (entities: Entity[], event: Ev, world: World) => {
         const relevantEntities = filterEntitiesByComponents(entities, requiredComponents);
         sys(relevantEntities, event, world);

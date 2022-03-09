@@ -17,4 +17,10 @@
 ## 0.12.5 Changes
 - Event propagation can now be stopped by setting the event.stopped to true
 - Update dependencies
-- Improve documentation
+- Improve documentation 
+
+ # 0.13.0 Changes
+ - Simplifies typing system to increase inference and improve developer expirience
+ - Adds createEventChain method that allows to use a currying pattern to specify systems for a specific event.
+ - Breaking: rename filterEntitiesByComponents to filterEntitiesByKeys
+ - Breaking: filterEntitiesByComponents now looks for the $$type property of the entities components.

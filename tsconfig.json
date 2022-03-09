@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES6",                       
+    "target": "ESNEXT",                       
     "module": "umd",                     
     "strict": true,                           
     "esModuleInterop": true,
