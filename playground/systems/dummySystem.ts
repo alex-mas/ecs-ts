@@ -10,6 +10,5 @@ export const dummySystem = regularSystem((entities, event: PeriodicEvent, world)
         if (true) {
             target = world.entities.find((e) => e.id === "s");
         }
-
     });
 }, [ComponentType.ATTACK, ComponentType.HEALTH] as const)
