@@ -73,7 +73,7 @@ requiredComponents can be found on the entity.
 */
 export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
     return entities.filter(
-        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find((k,c)=>(k as Component<any>)[1].$$type == rc))
+        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find((k,c)=>(k && k as Component<any>)[1].$$type == rc))
     ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
 }
 

@@ -96,7 +96,7 @@
 					<div class="tsd-signature tsd-kind-icon">Component&lt;Payload&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Payload</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>$$type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L1">ecs.ts:1</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L1">ecs.ts:1</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -112,7 +112,7 @@
 					<div class="tsd-signature tsd-kind-icon">Entity&lt;Payload&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Payload</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L5">ecs.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L5">ecs.ts:5</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -125,10 +125,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-has-type-parameter">
 					<a name="Event" class="tsd-anchor"></a>
 					<h3>Event</h3>
-					<div class="tsd-signature tsd-kind-icon">Event&lt;Payload&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Payload</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>stopped<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
+					<div class="tsd-signature tsd-kind-icon">Event&lt;Payload&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Payload</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>stopped<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L7">ecs.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L7">ecs.ts:7</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -144,7 +144,7 @@
 					<div class="tsd-signature tsd-kind-icon">Registered<wbr>System&lt;Ev&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>eventSubscription<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>execute<span class="tsd-signature-symbol">: </span><a href="modules.html#System" class="tsd-signature-type" data-tsd-kind="Type alias">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ev</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>priority<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L14">ecs.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L14">ecs.ts:14</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -174,7 +174,7 @@
 					<div class="tsd-signature tsd-kind-icon">System&lt;Ev, EPayload&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>entities<span class="tsd-signature-symbol">: </span><a href="modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EPayload</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ev</span>, world<span class="tsd-signature-symbol">: </span><a href="classes/World.html" class="tsd-signature-type" data-tsd-kind="Class">World</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L12">ecs.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L12">ecs.ts:12</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -227,7 +227,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L68">ecs.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L74">ecs.ts:74</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -259,7 +259,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L78">ecs.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L84">ecs.ts:84</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -291,7 +291,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/89ceca3/src/ecs.ts#L85">ecs.ts:85</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/ae3e087/src/ecs.ts#L91">ecs.ts:91</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>

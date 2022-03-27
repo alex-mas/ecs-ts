@@ -61,16 +61,70 @@
 				<a href="#about" id="about" style="color: inherit; text-decoration: none;">
 					<h1>About</h1>
 				</a>
-				<p>ecs-ts is 60 loc library that provides utilities to build <a href="https://en.wikipedia.org/wiki/Entity_component_system">entity component systems</a> </p>
+				<p>ecs-ts is a non opinionated and small library that provides utilities to build <a href="https://en.wikipedia.org/wiki/Entity_component_system">entity component systems</a>. It has no dependencies and since its built on typescript it provides the safety of types when it is possible. </p>
 				<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
 					<h1>Getting Started</h1>
 				</a>
 				<p>Install the package via npm</p>
 				<pre><code class="language-sh"><span style="color: #000000">npm install @axc/ecs-ts</span>
 </code></pre>
+				<p>or</p>
+				<pre><code class="language-sh"><span style="color: #000000">yarn add @axc/ecs-ts</span>
+</code></pre>
+				<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
+					<h1>Documentation</h1>
+				</a>
+				<a href="#component" id="component" style="color: inherit; text-decoration: none;">
+					<h2>Component</h2>
+				</a>
+				<p>A component is just data, it can be anything from a string, number or boolean to an object. Think of it of a feature, like Health or Movement.</p>
+				<a href="#entity" id="entity" style="color: inherit; text-decoration: none;">
+					<h2>Entity</h2>
+				</a>
+				<p>An entity is a dictionary that holds an id and components</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">entity</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;1&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">body:</span><span style="color: #000000"> </span><span style="color: #795E26">createBodyComponent</span><span style="color: #000000">(),</span>
+<span style="color: #000000">    </span><span style="color: #001080">health:</span><span style="color: #000000"> </span><span style="color: #795E26">createHealthComponent</span><span style="color: #000000">()</span>
+<span style="color: #000000">}</span>
+
+</code></pre>
+				<a href="#system" id="system" style="color: inherit; text-decoration: none;">
+					<h2>System</h2>
+				</a>
+				<p>A system is a function that performs some operations on the entities when the event it listens to is dispatched.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #795E26">system</span><span style="color: #000000"> = (</span><span style="color: #001080">entities</span><span style="color: #000000">, </span><span style="color: #001080">event</span><span style="color: #000000">, </span><span style="color: #001080">world</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000">(</span><span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">entity</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">entities</span><span style="color: #000000">){</span>
+<span style="color: #000000">        </span><span style="color: #008000">//do some work</span>
+<span style="color: #000000">    }</span>
+<span style="color: #000000">}</span>
+
+</code></pre>
+				<p>Common System operations can be abstarcted via Higher Order Functions, for example, a common use case is to only iterate on entites that have a set of components, that can be achieved by the utility function provided by this library </p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">physicsSystem</span><span style="color: #000000"> = </span><span style="color: #795E26">regularSystem</span><span style="color: #000000">((</span><span style="color: #001080">entities</span><span style="color: #000000">, </span><span style="color: #001080">event</span><span style="color: #000000">, </span><span style="color: #001080">world</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000">(</span><span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">entity</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">entities</span><span style="color: #000000">){</span>
+<span style="color: #000000">        </span><span style="color: #008000">//entity will allways contain a body component</span>
+<span style="color: #000000">        </span><span style="color: #001080">phsyicsEngine</span><span style="color: #000000">.</span><span style="color: #795E26">update</span><span style="color: #000000">(</span><span style="color: #001080">entity</span><span style="color: #000000">.</span><span style="color: #001080">body</span><span style="color: #000000">);</span>
+<span style="color: #000000">    }</span>
+<span style="color: #000000">}, [</span><span style="color: #A31515">&#039;body&#039;</span><span style="color: #000000">]);</span>
+</code></pre>
+				<a href="#world" id="world" style="color: inherit; text-decoration: none;">
+					<h2>World</h2>
+				</a>
+				<p>The world holds all the data required for a simulation to run, that is, the entities and the systems. On top of that, its api allows you to dispatch events that are listened by your systems.</p>
+				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> {</span><span style="color: #001080">World</span><span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;@axc/ecs-ts&#039;</span><span style="color: #000000">;</span>
+
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">world</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">World</span><span style="color: #000000">();</span>
+
+<span style="color: #001080">world</span><span style="color: #000000">.</span><span style="color: #795E26">registerSystem</span><span style="color: #000000">(</span><span style="color: #001080">yourSystem</span><span style="color: #000000">,</span><span style="color: #A31515">&#039;periodic&#039;</span><span style="color: #000000">);</span>
+
+<span style="color: #001080">world</span><span style="color: #000000">.</span><span style="color: #795E26">dispatch</span><span style="color: #000000">({</span><span style="color: #001080">type:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;periodic&#039;</span><span style="color: #000000"> </span><span style="color: #001080">dt</span><span style="color: #000000">: </span><span style="color: #098658">1000</span><span style="color: #000000">/</span><span style="color: #098658">60</span><span style="color: #000000">});</span>
+
+</code></pre>
 				<a href="#a-simple-demo" id="a-simple-demo" style="color: inherit; text-decoration: none;">
 					<h2>A simple demo</h2>
 				</a>
+				<p>Bringing everything together</p>
 				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> {</span><span style="color: #001080">World</span><span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;@axc/ecs-ts&#039;</span><span style="color: #000000">;</span>
 
 <span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">world</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">World</span><span style="color: #000000">();</span>
@@ -92,67 +146,26 @@
 <span style="color: #001080">world</span><span style="color: #000000">.</span><span style="color: #795E26">dispatch</span><span style="color: #000000">({</span><span style="color: #001080">type:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;periodic&#039;</span><span style="color: #000000">,</span><span style="color: #001080">dt:</span><span style="color: #000000"> </span><span style="color: #098658">1000</span><span style="color: #000000">/</span><span style="color: #098658">60</span><span style="color: #000000">});</span>
 
 </code></pre>
-				<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
+				<a href="#documentation-1" id="documentation-1" style="color: inherit; text-decoration: none;">
 					<h1>Documentation</h1>
 				</a>
-				<a href="#entity" id="entity" style="color: inherit; text-decoration: none;">
-					<h2>Entity</h2>
+				<p>You can see the automatically generated documentation <a href="https://alex-mas.github.io/ecs-ts/">here</a></p>
+				<a href="#usage-tips" id="usage-tips" style="color: inherit; text-decoration: none;">
+					<h1>Usage tips</h1>
 				</a>
-				<p>An entity is a dictionary that holds an id and component data</p>
-				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">entity</span><span style="color: #000000"> = {</span>
-<span style="color: #000000">    </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;1&#039;</span><span style="color: #000000">,</span>
-<span style="color: #000000">    </span><span style="color: #001080">body:</span><span style="color: #000000"> </span><span style="color: #795E26">createBodyComponent</span><span style="color: #000000">(),</span>
-<span style="color: #000000">    </span><span style="color: #001080">health:</span><span style="color: #000000"> </span><span style="color: #795E26">createHealthComponent</span><span style="color: #000000">()</span>
-<span style="color: #000000">}</span>
-
-</code></pre>
-				<a href="#system" id="system" style="color: inherit; text-decoration: none;">
-					<h2>System</h2>
+				<a href="#events" id="events" style="color: inherit; text-decoration: none;">
+					<h2>Events</h2>
 				</a>
-				<p>A system is a function that performs some operations on the entities when the event it listens to is dispatched.</p>
-				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #795E26">system</span><span style="color: #000000"> = (</span><span style="color: #001080">entities</span><span style="color: #000000">, </span><span style="color: #001080">event</span><span style="color: #000000">, </span><span style="color: #001080">world</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
-<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000">(</span><span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">entity</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">entities</span><span style="color: #000000">){</span>
-<span style="color: #000000">        </span><span style="color: #008000">//do some work</span>
-<span style="color: #000000">    }</span>
-<span style="color: #000000">}</span>
-
-</code></pre>
-				<p>Common System operations can be abstarcted via Higher Order Functions, for example, a common use case is to only iterate on entites that have a set of components, that can be achieved by the utility function provided by this library
-				This can be implemented easily as follows</p>
-				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #795E26">regularSystem</span><span style="color: #000000"> = (</span><span style="color: #001080">system</span><span style="color: #000000">, </span><span style="color: #001080">components</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
-<span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000">(</span><span style="color: #001080">entities</span><span style="color: #000000">, </span><span style="color: #001080">event</span><span style="color: #000000">, </span><span style="color: #001080">world</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
-<span style="color: #000000">        </span><span style="color: #795E26">system</span><span style="color: #000000">(</span>
-<span style="color: #000000">            </span><span style="color: #001080">enties</span><span style="color: #000000">.</span><span style="color: #795E26">filter</span><span style="color: #000000">(</span><span style="color: #001080">entity</span><span style="color: #000000"> </span><span style="color: #0000FF">=&gt;</span><span style="color: #001080">components</span><span style="color: #000000">.</span><span style="color: #795E26">every</span><span style="color: #000000">((</span><span style="color: #001080">component</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> !!(</span><span style="color: #267F99">Object</span><span style="color: #000000">.</span><span style="color: #795E26">keys</span><span style="color: #000000">(</span><span style="color: #001080">entity</span><span style="color: #000000">)).</span><span style="color: #795E26">find</span><span style="color: #000000">((</span><span style="color: #001080">key</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #001080">key</span><span style="color: #000000"> === </span><span style="color: #001080">component</span><span style="color: #000000">))),</span>
-<span style="color: #000000">            </span><span style="color: #001080">event</span><span style="color: #000000">,</span>
-<span style="color: #000000">            </span><span style="color: #001080">world</span>
-<span style="color: #000000">        )</span>
-<span style="color: #000000">    }</span>
-<span style="color: #000000">}</span>
-</code></pre>
-				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">physicsSystem</span><span style="color: #000000"> = </span><span style="color: #795E26">regularSystem</span><span style="color: #000000">((</span><span style="color: #001080">entities</span><span style="color: #000000">, </span><span style="color: #001080">event</span><span style="color: #000000">, </span><span style="color: #001080">world</span><span style="color: #000000">)</span><span style="color: #0000FF">=&gt;</span><span style="color: #000000">{</span>
-<span style="color: #000000">    </span><span style="color: #AF00DB">for</span><span style="color: #000000">(</span><span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">entity</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">entities</span><span style="color: #000000">){</span>
-<span style="color: #000000">        </span><span style="color: #008000">//entity will allways contain body component</span>
-<span style="color: #000000">        </span><span style="color: #001080">phsyicsEngine</span><span style="color: #000000">.</span><span style="color: #795E26">update</span><span style="color: #000000">(</span><span style="color: #001080">entity</span><span style="color: #000000">);</span>
-<span style="color: #000000">    }</span>
-<span style="color: #000000">}, [</span><span style="color: #A31515">&#039;body&#039;</span><span style="color: #000000">]);</span>
-</code></pre>
-				<a href="#world" id="world" style="color: inherit; text-decoration: none;">
-					<h2>World</h2>
+				<p>While the dispatching of events is built into the world, you have two options:</p>
+				<ul>
+					<li>You can represent application specific events as entities, and only dispatch periodic events, letting the systems take care of it by filtering the components.</li>
+					<li>You can dispatch the application specific events themselves and setup the systems to listen to the events</li>
+				</ul>
+				<p>In the end both ways allow for intercepting and modifying the events, for example, an armor systems that detects damage events and reduces its amount.</p>
+				<a href="#component-complexity" id="component-complexity" style="color: inherit; text-decoration: none;">
+					<h2>Component complexity</h2>
 				</a>
-				<p>The world holds all the data required for a simulation to run, that is, the entities and the systems. On top of that, its api allows you to dispatch events that are listened by your systems.</p>
-				<pre><code class="language-js"><span style="color: #AF00DB">import</span><span style="color: #000000"> {</span><span style="color: #001080">World</span><span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;@axc/ecs-ts&#039;</span><span style="color: #000000">;</span>
-
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">world</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">World</span><span style="color: #000000">();</span>
-
-<span style="color: #001080">world</span><span style="color: #000000">.</span><span style="color: #795E26">registerSystem</span><span style="color: #000000">(</span><span style="color: #001080">yourSystem</span><span style="color: #000000">,</span><span style="color: #A31515">&#039;periodic&#039;</span><span style="color: #000000">);</span>
-
-<span style="color: #001080">world</span><span style="color: #000000">.</span><span style="color: #795E26">dispatch</span><span style="color: #000000">({</span><span style="color: #001080">type:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;periodic&#039;</span><span style="color: #000000"> </span><span style="color: #001080">dt</span><span style="color: #000000">: </span><span style="color: #098658">1000</span><span style="color: #000000">/</span><span style="color: #098658">60</span><span style="color: #000000">});</span>
-
-</code></pre>
-				<a href="#api-documentation" id="api-documentation" style="color: inherit; text-decoration: none;">
-					<h1>API Documentation</h1>
-				</a>
-				<p>You can see the automatically generated documentation <a href="https://alex-mas.github.io/ecs-ts/modules/_ecs_.html">here</a></p>
+				<p>Try to minimize the complexity of the components, chances are that if a component is getting complex it could be better represented as a set an entity and its features broken into their own components. In the end this will result in more flexibility and easier code to read/maintain.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

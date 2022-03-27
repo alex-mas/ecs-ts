@@ -24,3 +24,7 @@
  - Adds createEventChain method that allows to use a currying pattern to specify systems for a specific event.
  - Breaking: rename filterEntitiesByComponents to filterEntitiesByKeys
  - Breaking: filterEntitiesByComponents now looks for the $$type property of the entities components.
+
+
+# 0.13.1 Changes
+ -  filterEntitiesByComponents now ignores undefined keys on the object.
