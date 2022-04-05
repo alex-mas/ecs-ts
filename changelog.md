@@ -25,6 +25,8 @@
  - Breaking: rename filterEntitiesByComponents to filterEntitiesByKeys
  - Breaking: filterEntitiesByComponents now looks for the $$type property of the entities components.
 
-
 # 0.13.1 Changes
  -  filterEntitiesByComponents now ignores undefined keys on the object.
+ 
+ # 0.13.2 Changes
+ -  Added getComponents utility to retrieve components of the entity

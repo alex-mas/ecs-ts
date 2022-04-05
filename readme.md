@@ -1,6 +1,6 @@
 # About
 
-ecs-ts is a non opinionated and small library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system). It has no dependencies and since its built on typescript it provides the safety of types when it is possible. 
+ecs-ts is an unopinionated and small library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system). It has no dependencies and since its built on typescript it provides the safety of types when it is possible. 
 
 
 # Getting Started
@@ -20,6 +20,23 @@ yarn add @axc/ecs-ts
 ## Component
 
 A component is just data, it can be anything from a string, number or boolean to an object. Think of it of a feature, like Health or Movement.
+
+If you intend to use the utility functions provided by this library its recomended that each component has a $$type variable that identifies the type of the component. 
+However, if you wish, you can easily build your utility functions to work around this restriction.
+
+An hipotetic example of a Health component creator.
+
+```js
+
+const createHealthComponent = (maximum, current)=>{
+  return {
+    $$type: 'HEALTH_COMPONENT'
+    current,
+    maximum
+  }
+}
+
+```
 
 ## Entity
 
@@ -52,7 +69,8 @@ Common System operations can be abstarcted via Higher Order Functions, for examp
 const physicsSystem = regularSystem((entities, event, world)=>{
     for(let entity in entities){
         //entity will allways contain a body component
-        phsyicsEngine.update(entity.body);
+        const body = getComponents(entity, 'body')[0];
+        phsyicsEngine.update(body);
     }
 }, ['body']);
 ```
@@ -119,3 +137,37 @@ In the end both ways allow for intercepting and modifying the events, for exampl
 ## Component complexity
 
 Try to minimize the complexity of the components, chances are that if a component is getting complex it could be better represented as a set an entity and its features broken into their own components. In the end this will result in more flexibility and easier code to read/maintain.
+
+
+## Types
+
+
+### Entity Payload
+
+This is a user defined type that describes how could an entity look, that is, an entity with an optional reference to all possible components.
+
+an example:
+```ts
+export type AnyComponent = HealthComponent | MovementComponent | BodyComponent  //etc... 
+export type EntityPayload = {
+  [k: string]: AnyComponent 
+}
+```
+
+### Component types
+
+From my experience this is the easier way to define the type of a component. An alternative way would be to define a payload type and export Component<Payload> as the type, but that tends to be more verbose.
+
+```ts
+
+const createHealthComponent = (maximum: number, current: number)=>{
+  return {
+    $$type: 'HEALTH_COMPONENT'
+    current,
+    maximum
+  }
+}
+
+export type HealthComponent = ReturnType<typeof createHealthComponent>;
+
+```

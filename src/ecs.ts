@@ -2,6 +2,9 @@ export type Component<Payload extends object = {}> = Payload & {
     $$type: string
 }
 
+export type ComponentDictionary<Payload extends object = {}> = {
+    [key: string]: Component<Payload>
+}
 export type Entity<Payload extends object = {}> = Payload & { id: string };
 
 export type Event<Payload extends object = any> = Payload & {
@@ -73,7 +76,7 @@ requiredComponents can be found on the entity.
 */
 export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
     return entities.filter(
-        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find((k,c)=>(k && k as Component<any>)[1].$$type == rc))
+        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find(([k,v],c)=>(v && v as Component<any>).$$type == rc))
     ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
 }
 
@@ -88,9 +91,13 @@ export const filterEntitiesByKeys= <T extends ReadonlyArray<string>>(entities: E
 }
 
 
-export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>>(sys: System<Ev, { [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>, requiredComponents: T) => {
-    return (entities: Entity[], event: Ev, world: World) => {
+export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>, EntityPayload extends object = {}>(sys: System<Ev, { [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>, requiredComponents: T) => {
+    return (entities: Entity<EntityPayload>[], event: Ev, world: World<EntityPayload>) => {
         const relevantEntities = filterEntitiesByComponents(entities, requiredComponents);
         sys(relevantEntities, event, world);
     }
+}
+
+export const getComponents = <EntityPayload extends object = {}>(entity: Entity<EntityPayload>, componentType: string) => {    
+    return Object.entries(entity).filter(([k, v]) => v && (v as Component<any>).$$type === componentType).map(([k, v]) => v) as unknown as EntityPayload[Exclude<keyof EntityPayload, 'id'>][];
 }
