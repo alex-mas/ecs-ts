@@ -27,6 +27,5 @@
 
 # 0.13.1 Changes
  -  filterEntitiesByComponents now ignores undefined keys on the object.
- 
- # 0.13.2 Changes
  -  Added getComponents utility to retrieve components of the entity
+ -  Ensures immutability of entities and provices mechanisms for updating the entities
