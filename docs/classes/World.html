@@ -95,16 +95,21 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="World.html#entities" class="tsd-kind-icon">entities</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="World.html#running" class="tsd-kind-icon">running</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="World.html#systems" class="tsd-kind-icon">systems</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="World.html#toAdd" class="tsd-kind-icon">to<wbr>Add</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="World.html#toRemove" class="tsd-kind-icon">to<wbr>Remove</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="World.html#add" class="tsd-kind-icon">add</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="World.html#clear" class="tsd-kind-icon">clear</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="World.html#createEventChain" class="tsd-kind-icon">create<wbr>Event<wbr>Chain</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="World.html#dispatch" class="tsd-kind-icon">dispatch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="World.html#registerSystem" class="tsd-kind-icon">register<wbr>System</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="World.html#remove" class="tsd-kind-icon">remove</a></li>
 							</ul>
 						</section>
 					</div>
@@ -141,7 +146,17 @@
 					<div class="tsd-signature tsd-kind-icon">entities<span class="tsd-signature-symbol">:</span> <a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L24">ecs.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L24">ecs.ts:24</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="running" class="tsd-anchor"></a>
+					<h3>running</h3>
+					<div class="tsd-signature tsd-kind-icon">running<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L28">ecs.ts:28</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -151,13 +166,56 @@
 					<div class="tsd-signature tsd-kind-icon">systems<span class="tsd-signature-symbol">:</span> <a href="../modules.html#RegisteredSystem" class="tsd-signature-type" data-tsd-kind="Type alias">RegisteredSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L25">ecs.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L27">ecs.ts:27</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="toAdd" class="tsd-anchor"></a>
+					<h3>to<wbr>Add</h3>
+					<div class="tsd-signature tsd-kind-icon">to<wbr>Add<span class="tsd-signature-symbol">:</span> <a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L26">ecs.ts:26</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="toRemove" class="tsd-anchor"></a>
+					<h3>to<wbr>Remove</h3>
+					<div class="tsd-signature tsd-kind-icon">to<wbr>Remove<span class="tsd-signature-symbol">:</span> <a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L25">ecs.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="add" class="tsd-anchor"></a>
+					<h3>add</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>entity<span class="tsd-signature-symbol">: </span><a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L76">ecs.ts:76</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>entity: <a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="clear" class="tsd-anchor"></a>
 					<h3>clear</h3>
@@ -168,7 +226,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L65">ecs.ts:65</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L93">ecs.ts:93</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -185,7 +243,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L35">ecs.ts:35</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L38">ecs.ts:38</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -252,7 +310,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L54">ecs.ts:54</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L57">ecs.ts:57</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -281,7 +339,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/10adf46/src/ecs.ts#L26">ecs.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L29">ecs.ts:29</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -300,6 +358,29 @@
 								</li>
 								<li>
 									<h5>priority: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="remove" class="tsd-anchor"></a>
+					<h3>remove</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>entity<span class="tsd-signature-symbol">: </span><a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/alex-mas/ecs-ts/blob/dbfdced/src/ecs.ts#L84">ecs.ts:84</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>entity: <a href="../modules.html#Entity" class="tsd-signature-type" data-tsd-kind="Type alias">Entity</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EntityPayloads</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -330,7 +411,19 @@
 								<a href="World.html#entities" class="tsd-kind-icon">entities</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="World.html#running" class="tsd-kind-icon">running</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="World.html#systems" class="tsd-kind-icon">systems</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="World.html#toAdd" class="tsd-kind-icon">to<wbr>Add</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="World.html#toRemove" class="tsd-kind-icon">to<wbr>Remove</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="World.html#add" class="tsd-kind-icon">add</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="World.html#clear" class="tsd-kind-icon">clear</a>
@@ -343,6 +436,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="World.html#registerSystem" class="tsd-kind-icon">register<wbr>System</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="World.html#remove" class="tsd-kind-icon">remove</a>
 							</li>
 						</ul>
 					</li>

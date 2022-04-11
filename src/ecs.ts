@@ -25,7 +25,6 @@ export class World<EntityPayloads extends object = any> {
     toRemove: Entity<EntityPayloads>[] = [];
     toAdd: Entity<EntityPayloads>[] = [];
     systems: RegisteredSystem<any>[] = [];
-    running: boolean = false;
     registerSystem = <Ev extends Event>(sys: System<Ev, EntityPayloads>, event: string, priority: number = 1) => {
         const registeredSystem = {
             priority,
@@ -55,7 +54,6 @@ export class World<EntityPayloads extends object = any> {
         return chainCreator;
     }
     dispatch = <Ev extends Event<{}>>(event: Ev) => {
-        this.running = true;
         const systemsToExecute = this.systems.filter(
             (system) => system.eventSubscription === event.type
         ).sort((a, b) => b.priority - a.priority);
@@ -70,24 +68,15 @@ export class World<EntityPayloads extends object = any> {
                 .filter((e) => !this.toRemove.find((entity) => e.id === entity.id))
                 .concat(this.toAdd);
         }
-        this.running = false;
         return this;
     }
     add = (entity: Entity<EntityPayloads>) => {
-        if (!this.running) {
-            this.entities.push(entity);
-        } else {
-            this.toAdd.push(entity);
-        }
+        this.entities = [...this.entities, entity];
         return this;
     }
     remove = (entity: Entity<EntityPayloads>) => {
-        if (!this.running) {
-            this.entities = this.entities
-                .filter((e) => { return e.id !== entity.id });
-        } else {
-            this.toRemove.push(entity);
-        }
+        this.entities = this.entities
+          .filter((e) => { return e.id !== entity.id });
         return this;
     }
     clear = () => {

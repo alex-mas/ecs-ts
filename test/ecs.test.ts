@@ -13,6 +13,20 @@ beforeEach(() => {
 });
 
 
+test('Add method adds an entity to the world',()=>{
+  const entity = {id:'1'};
+  world.add(entity);
+  expect(world.entities.length).toBe(1);
+  expect(world.entities[0]).toBe(entity);
+});
+
+test('Remove method removes an entity from the world',()=>{
+  const entity = {id:'1'};
+  world.entities = [entity];
+  world.remove(entity);
+  expect(world.entities.length).toBe(0);
+});
+
 
 test('Systems are added to the world properly when registering a chain', () => {
   const aSystem: System<PeriodicEvent, { x: number }> = (entities, event, world) => {
@@ -30,6 +44,7 @@ test('Systems are added to the world properly when registering a chain', () => {
   expect(world.systems.length).toBe(2);
 });
 
+
 test('Systems get properly executed when the appropiate event is dispatched', () => {
   const system: System<PeriodicEvent, { x: number }> = (entities, event, world) => {
     const entity = entities[0];
@@ -39,7 +54,7 @@ test('Systems get properly executed when the appropiate event is dispatched', ()
     id: 1,
     x: 0
   };
-  world.entities.push(entity);
+  world.add(entity);
   world.registerSystem(system, PERIODIC);
   world.dispatch(createPeriodicEvent(0));
   expect(entity.x).toBe(1);
@@ -58,7 +73,7 @@ test('Systems get executed respecting the priority', () => {
     id: 1,
     x: 1
   };
-  world.entities.push(entity);
+  world.add(entity);
   world.createEventChain(PERIODIC)
     .addSystem(aSystem)
     .addSystem(bSystem)
@@ -76,7 +91,7 @@ test('Systems ignore events they were not registered for', () => {
     id: 1,
     x: 0
   };
-  world.entities.push(entity);
+  world.add(entity);
   world.registerSystem(system, PERIODIC);
   world.dispatch({ type: 'not periodic', stopped: false });
   expect(entity.x).toBe(0);
