@@ -1,6 +1,6 @@
 # About
 
-ecs-ts is an unopinionated and small library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system). It has no dependencies and since its built on typescript it provides the safety of types when it is possible. 
+ecs-ts is an unopinionated library that provides utilities to build [entity component systems](https://en.wikipedia.org/wiki/Entity_component_system). It has no dependencies and since its built on typescript it provides the safety of types when it is possible. 
 
 
 # Getting Started
@@ -136,7 +136,7 @@ In the end both ways allow for intercepting and modifying the events, for exampl
 
 ## Component complexity
 
-Try to minimize the complexity of the components, chances are that if a component is getting complex it could be better represented as a set an entity and its features broken into their own components. In the end this will result in more flexibility and easier code to read/maintain.
+Try to minimize the complexity of the components, chances are that if a component is getting complex it could be better represented as an entity and its features broken into their own components. In the end this will result in more flexibility and easier code to read/maintain.
 
 
 ## Types
@@ -145,7 +145,6 @@ Try to minimize the complexity of the components, chances are that if a componen
 ### Entity Payload
 
 This is a user defined type that describes how could an entity look, that is, an entity with an optional reference to all possible components.
-
 an example:
 ```ts
 export type AnyComponent = HealthComponent | MovementComponent | BodyComponent  //etc... 
@@ -156,7 +155,7 @@ export type EntityPayload = {
 
 ### Component types
 
-From my experience this is the easier way to define the type of a component. An alternative way would be to define a payload type and export Component<Payload> as the type, but that tends to be more verbose.
+From my experience this is the easier way to define the type of a component. 
 
 ```ts
 
@@ -171,3 +170,4 @@ const createHealthComponent = (maximum: number, current: number)=>{
 export type HealthComponent = ReturnType<typeof createHealthComponent>;
 
 ```
+An alternative way would be to define a payload type and export Component<Payload> as the type, but that tends to be more verbose.
