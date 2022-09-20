@@ -1,89 +1,89 @@
 export type Component<Payload extends object = {}> = Payload & {
-    $$type: string
+  $$type: string
 }
 
 export type ComponentDictionary<Payload extends object = {}> = {
-    [key: string]: Component<Payload>,
+  [key: string]: Component<Payload>,
 }
-export type Entity<Payload extends object = {}> =Payload& { id: string };
+export type Entity<Payload extends object = {}> = Payload & { id: string };
 
 export type Event<Payload extends object = any> = Payload & {
-    type: string,
-    stopped?: boolean
+  type: string,
+  stopped?: boolean
 }
 
 export type System<Ev extends Event, EPayload extends object = {}> = (entities: Entity<EPayload>[], event: Ev, world: World) => void
 
 export type RegisteredSystem<Ev extends Event = Event<any>> = {
-    execute: System<Ev, any>,
-    eventSubscription: string,
-    priority: number
+  execute: System<Ev, any>,
+  eventSubscription: string,
+  priority: number
 }
 
 export class World<EntityPayloads extends object = any> {
-    entities: Entity<EntityPayloads>[] = [];
-    toRemove: Entity<EntityPayloads>[] = [];
-    toAdd: Entity<EntityPayloads>[] = [];
-    systems: RegisteredSystem<any>[] = [];
-    registerSystem = <Ev extends Event>(sys: System<Ev, EntityPayloads>, event: string, priority: number = 1) => {
-        const registeredSystem = {
-            priority,
-            execute: sys,
-            eventSubscription: event
-        };
-        this.systems.push(registeredSystem);
-        return this;
-    }
-    createEventChain = (event: string) => {
-        const systems: RegisteredSystem<any>[] = [];
-        const chainCreator = {
-            addSystem: <Ev extends Event>(sys: System<Ev, EntityPayloads>) => {
-                systems.push({
-                    priority: systems.length,
-                    execute: sys,
-                    eventSubscription: event
+  entities: Entity<EntityPayloads>[] = [];
+  toRemove: Entity<EntityPayloads>[] = [];
+  toAdd: Entity<EntityPayloads>[] = [];
+  systems: RegisteredSystem<any>[] = [];
+  registerSystem = <Ev extends Event>(sys: System<Ev, EntityPayloads>, event: string, priority: number = 1) => {
+    const registeredSystem = {
+      priority,
+      execute: sys,
+      eventSubscription: event
+    };
+    this.systems.push(registeredSystem);
+    return this;
+  }
+  createEventChain = (event: string) => {
+    const systems: RegisteredSystem<any>[] = [];
+    const chainCreator = {
+      addSystem: function <Ev extends Event>(sys: System<Ev, EntityPayloads>) {
+        systems.push({
+          priority: systems.length,
+          execute: sys,
+          eventSubscription: event
 
-                });
-                return chainCreator;
-            },
-            register: () => {
-                systems.forEach((s) => s.priority = systems.length - s.priority);
-                this.systems = this.systems.concat(systems);
-            }
-        };
-        return chainCreator;
-    }
-    dispatch = <Ev extends Event<{}>>(event: Ev) => {
-        const systemsToExecute = this.systems.filter(
-            (system) => system.eventSubscription === event.type
-        ).sort((a, b) => b.priority - a.priority);
-        const entities = [...this.entities];
-        systemsToExecute.forEach((s) => {
-            if (!event.stopped) {
-                s.execute(entities, event, this);
-            }
         });
-        if (this.toAdd.length > 0 || this.toRemove.length > 0) {
-            this.entities = this.entities
-                .filter((e) => !this.toRemove.find((entity) => e.id === entity.id))
-                .concat(this.toAdd);
-        }
         return this;
+      },
+      register: () => {
+        systems.forEach((s) => s.priority = systems.length - s.priority);
+        this.systems = this.systems.concat(systems);
+      }
+    };
+    return chainCreator;
+  }
+  dispatch = <Ev extends Event<{}>>(event: Ev) => {
+    const systemsToExecute = this.systems.filter(
+      (system) => system.eventSubscription === event.type
+    ).sort((a, b) => b.priority - a.priority);
+    const entities = [...this.entities];
+    systemsToExecute.forEach((s) => {
+      if (!event.stopped) {
+        s.execute(entities, event, this);
+      }
+    });
+    if (this.toAdd.length > 0 || this.toRemove.length > 0) {
+      this.entities = this.entities
+        .filter((e) => !this.toRemove.find((entity) => e.id === entity.id))
+        .concat(this.toAdd);
     }
-    add = (entity: Entity<EntityPayloads>) => {
-        this.entities = [...this.entities, entity];
-        return this;
-    }
-    remove = (entity: Entity<EntityPayloads>) => {
-        this.entities = this.entities
-          .filter((e) => { return e.id !== entity.id });
-        return this;
-    }
-    clear = () => {
-        this.systems = [];
-        this.entities = [];
-        return this;
-    }
+    return this;
+  }
+  add = (entity: Entity<EntityPayloads>) => {
+    this.entities = [...this.entities, entity];
+    return this;
+  }
+  remove = (entity: Entity<EntityPayloads>) => {
+    this.entities = this.entities
+      .filter((e) => { return e.id !== entity.id });
+    return this;
+  }
+  clear = () => {
+    this.systems = [];
+    this.entities = [];
+    return this;
+  }
 }
 
 
@@ -92,9 +92,9 @@ Returns a subset of entities that ensures that components with matching types to
 requiredComponents can be found on the entity.
 */
 export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
-    return entities.filter(
-        (entity) => requiredComponents.every((rc) =>Object.entries(entity).find(([k,v],c)=>(v && v as Component<any>).$$type == rc))
-    ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
+  return entities.filter(
+    (entity) => requiredComponents.every((rc) => Object.entries(entity).find(([k, v], c) => (v && v as Component<any>).$$type == rc))
+  ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
 }
 
 
@@ -102,19 +102,19 @@ export const filterEntitiesByComponents = <T extends ReadonlyArray<string>>(enti
 Returns a subset of entities that have the specified strings as keys. (Assumes the component type can be deduced from the key of the entity)
 */
 export const filterEntitiesByKeys = <T extends ReadonlyArray<string>>(entities: Entity<any>[], requiredComponents: T): Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[] => {
-    return entities.filter(
-        (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as T).find((k) => k === rc))
-    )  as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
+  return entities.filter(
+    (entity) => requiredComponents.every((rc) => !!(Object.keys(entity) as unknown as T).find((k) => k === rc))
+  ) as Entity<{ [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>[];
 }
 
 
 export const regularSystem = <Ev extends Event, T extends ReadonlyArray<string>, EntityPayload extends object = {}>(sys: System<Ev, { [K in (T extends ReadonlyArray<infer U> ? U : never)]: any }>, requiredComponents: T) => {
-    return (entities: Entity<EntityPayload>[], event: Ev, world: World<EntityPayload>) => {
-        const relevantEntities = filterEntitiesByComponents(entities, requiredComponents);
-        sys(relevantEntities, event, world);
-    }
+  return (entities: Entity<EntityPayload>[], event: Ev, world: World<EntityPayload>) => {
+    const relevantEntities = filterEntitiesByComponents(entities, requiredComponents);
+    sys(relevantEntities, event, world);
+  }
 }
 
 export const getComponents = <EntityPayload extends object = {}>(entity: Entity<EntityPayload>, componentType: string) => {
-    return Object.entries(entity).filter(([k, v]) => v && (v as Component<any>).$$type === componentType).map(([k, v]) => v) as unknown as EntityPayload[Exclude<keyof EntityPayload, 'id'>][];
+  return Object.entries(entity).filter(([k, v]) => v && (v as Component<any>).$$type === componentType).map(([k, v]) => v) as unknown as EntityPayload[Exclude<keyof EntityPayload, 'id'>][];
 }

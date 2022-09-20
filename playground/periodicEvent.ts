@@ -1,4 +1,3 @@
-import {Event} from '../../src/ecs';
-import { EventType } from './eventType';
+import { Event } from '../src/ecs';
 
-export type PeriodicEvent =Event<{dt: number}>;
+export type PeriodicEvent = Event<{ dt: number }>;
