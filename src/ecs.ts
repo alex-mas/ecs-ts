@@ -18,7 +18,6 @@ export type RegisteredSystem<Ev extends Event = Event<any>> = {
   priority: number
 }
 
-
 export class World<CpType extends string = string>{
   components: Map<CpType,Component<any>[]> = new Map();
   systems: Map<string,  RegisteredSystem<any>[]>= new Map();
