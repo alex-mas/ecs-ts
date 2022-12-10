@@ -3,7 +3,8 @@
     "target": "ESNEXT",                       
     "module": "umd",                     
     "strict": true,
-    "moduleResolution": "node",                      
+    "moduleResolution": "node",
+    "skipLibCheck": true,                   
     "esModuleInterop": true,
     "outDir": "bin",               
     //No thanks

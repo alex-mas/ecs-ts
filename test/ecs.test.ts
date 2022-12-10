@@ -52,7 +52,6 @@ test('Systems get properly executed when the appropiate event is dispatched', as
     .addSystem(system, [])
     .register()
     .dispatch(createPeriodicEvent(0));
-  console.log('here');
   expect(positionCp.x).toBe(1);
 });
 

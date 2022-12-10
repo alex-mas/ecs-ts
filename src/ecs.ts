@@ -72,17 +72,15 @@ export class World<CpType extends string = string>{
     if (!relevantSystems) { return; }
     const executed: DirectedGraphNode<RegisteredSystem<Ev>>[] = [];
     let available = relevantSystems.filter((v) => {
-      v.parents.length === 0;
+      return v.parents.length === 0;
     });
     while (executed.length < relevantSystems.length) {
       if (available.length > 0) {
         const executing = available;
         available = [];
-        console.log('about to execute', executing);
-        executing.forEach((s) => {
-          console.log('executing');
-          this.runner(s.value.execute, event, this).then((res) => {
-            console.log('executed');
+        const completed = await Promise.race(executing.map(async (s) => {
+          try {
+            const res = await this.runner(s.value.execute, event, this)
             executed.push(s);
             s.children.forEach((child) => {
               const childNode = relevantSystems[child];
@@ -90,9 +88,12 @@ export class World<CpType extends string = string>{
                 throw new Error(`System ${s.value.execute.name} child system ${child} not found`);
               }
               available.push(childNode);
-            })
-          });
-        });
+            });
+            return res;
+          } catch (e) {
+            throw e;
+          }
+        }));
       } else {
         continue;
       }
