@@ -28,14 +28,14 @@ test('Systems are added to the world properly when registering a chain', () => {
     }
   };
   world.createEventChain(PERIODIC)
-    .addSystem(aSystem)
-    .addSystem(bSystem)
+    .addSystem(aSystem, [])
+    .addSystem(bSystem, [aSystem])
     .register();
   expect(world.systems.get(PERIODIC)?.length ).toBe(2);
 });
 
 
-test('Systems get properly executed when the appropiate event is dispatched', () => {
+test('Systems get properly executed when the appropiate event is dispatched', async () => {
   const system: System<PeriodicEvent> = ( event, world) => {
     const position = world.components.get('position')
     if(position){
@@ -48,14 +48,15 @@ test('Systems get properly executed when the appropiate event is dispatched', ()
     x: 0
   };
   world.components.set('position', [positionCp]);
-  world.createEventChain(PERIODIC)
-    .addSystem(system)
+  await world.createEventChain(PERIODIC)
+    .addSystem(system, [])
     .register()
     .dispatch(createPeriodicEvent(0));
+  console.log('here');
   expect(positionCp.x).toBe(1);
 });
 
-test('Systems get executed respecting the priority', () => {
+test('Systems get executed respecting the priority', async () => {
   const aSystem: System<PeriodicEvent> = ( event, world) => {
     const position = world.components.get('position')
     if(position){
@@ -74,7 +75,7 @@ test('Systems get executed respecting the priority', () => {
       x: 0
     };
   world.components.set('position', [positionCp]);
-  world.createEventChain(PERIODIC)
+  await world.createEventChain(PERIODIC)
     .addSystem(aSystem)
     .addSystem(bSystem)
     .register()
@@ -82,7 +83,7 @@ test('Systems get executed respecting the priority', () => {
   expect(positionCp.x).toBe(3);
 });
 
-test('Systems ignore events they were not registered for', () => {
+test('Systems ignore events they were not registered for', async () => {
   const system: System<PeriodicEvent> = ( event, world) => {
     const position = world.components.get('position')
     if(position){
@@ -95,7 +96,7 @@ test('Systems ignore events they were not registered for', () => {
     x: 0
   };
   world.components.set('position', [positionCp]);
-  world.createEventChain(PERIODIC)
+  await world.createEventChain(PERIODIC)
     .addSystem(system)
     .register()
     .dispatch({ type: 'not periodic'});

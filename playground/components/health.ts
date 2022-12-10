@@ -1,16 +1,17 @@
-import { ComponentType } from "./componentType"
+import { ComponentType } from "./componentType";
 
 export interface HealthComponentData {
-    maximum: number,
-    current: number
+  maximum: number,
+  current: number
 }
 
-export const createHealthComponent = (initial: number, maximum: number)=>{
-    return {
-        $$type: ComponentType.HEALTH,
-        current: initial,
-        maximum
-    }
+export const createHealthComponent = (ownerId: string, initial: number, maximum: number) => {
+  return {
+    $$type: ComponentType.HEALTH,
+    $$ownerId: ownerId,
+    current: initial,
+    maximum
+  }
 }
 
 export type HealthComponent = ReturnType<typeof createHealthComponent>;

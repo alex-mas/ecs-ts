@@ -11,7 +11,7 @@
     "emitDecoratorMetadata": false,       
     "declaration": true
   },
-  "files": [
-    "./src/ecs.ts"
+  "include": [
+    "src"
   ]
 }

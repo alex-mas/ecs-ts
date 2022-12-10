@@ -1,14 +1,12 @@
-import { regularSystem, Entity, filterEntitiesByComponents, World } from "../../src/ecs";
+import { System } from "../../src/ecs";
 import { ComponentType } from "../components/componentType";
-import { EventType } from "../eventType";
+import { HealthComponent } from "../components/health";
 import { PeriodicEvent } from "../periodicEvent";
 
-export const dummySystem = regularSystem((entities, event: PeriodicEvent, world) => {
-    entities.forEach((entity) => {
-        if (!entity.health.isAlive) { return; }
-        let target: Entity| undefined;
-        if (true) {
-            target = world.entities.find((e) => e.id === "s");
-        }
-    });
-}, [ComponentType.ATTACK, ComponentType.HEALTH] as const)
+export const dummySystem: System<PeriodicEvent> = (event: PeriodicEvent, world) => {
+  world.components.get(ComponentType.HEALTH)?.forEach((cp: HealthComponent) => {
+    if (cp.current > 0) {
+      console.log(cp.$$ownerId);
+    }
+  });
+};

@@ -1,3 +1,11 @@
+import { addNode, DirectedGraph, DirectedGraphNode } from "./graph";
+
+
+const mapSystemsToNodes = <T>(systems: System<T>[], graph: DirectedGraph<RegisteredSystem<T>>) => {
+  return systems.map((s) => graph.findIndex((v) => v.value.execute === s))
+}
+
+
 type Dict<ValTyp = any> = {
   [key: string]: ValTyp
 }
@@ -7,46 +15,88 @@ export type Component<Payload extends object = {}, EntityIdType =string> =
     $$entityId: EntityIdType
   }
 
-
 export type Event<Payload extends object = any> = Payload & {
   type: string,
 }
 export type System<Ev extends Event> = (event: Ev, world: World) => void
 
 export type RegisteredSystem<Ev extends Event = Event<any>> = {
-  execute: System<Ev>,
-  priority: number
+  execute: System<Ev>
+}
+
+export type SystemRunner = <T>(system: System<T>, event: T, world: World) => Promise<number>;
+
+export const defaultSystemRunner: SystemRunner = async<T>(system: System<T>, event: T, world: World) => {
+  system(event, world);
+  return 0;
 }
 
 export class World<CpType extends string = string>{
+  runner: SystemRunner;
   components: Map<CpType,Component<any>[]> = new Map();
-  systems: Map<string,  RegisteredSystem<any>[]>= new Map();
+  systems: Map<string, DirectedGraph<RegisteredSystem<any>>> = new Map();
+  constructor(runner: SystemRunner = defaultSystemRunner) {
+    this.runner = runner;
+  }
   createEventChain(event: string) {
-    const systems: RegisteredSystem<any>[] = [];
+    const systemsGraph: DirectedGraph<RegisteredSystem<any>> = [];
     const chainCreator = {
-      addSystem: function <Ev extends Event>(sys: System<Ev>) {
-        systems.push({
-          priority: systems.length,
+      addSystem: function <Ev extends Event>(sys: System<Ev>, dependsOn: System<Ev>[] = []) {
+        addNode({
           execute: sys
-        });
+        }, mapSystemsToNodes(dependsOn, systemsGraph), systemsGraph);
         return this as typeof chainCreator;
       },
-      register: () => {
-        systems.forEach((s) => s.priority = systems.length - s.priority);
+      addSystems: function <Ev extends Event>(sys: System<Ev>[], dependsOn: System<Ev>[] = []) {
+        sys.forEach((s) => {
+          addNode({
+            execute: s
+          }, mapSystemsToNodes(dependsOn, systemsGraph), systemsGraph);
+        })
+        return this as typeof chainCreator;
+      },
+      register: (): World<CpType> => {
         const existingSystems =this.systems.get(event);
         if(!existingSystems){
-          this.systems.set(event, systems);
+          this.systems.set(event, systemsGraph);
         }else{
-          this.systems.set(event,existingSystems.concat(systems));
+          throw new Error('Registering multiple execution graphs to to same event is not suported yet');
         }
-        return this as World;
+        return this;
       }
     };
     return chainCreator;
   }
-  dispatch<Ev extends Event<{}>>(event: Ev)  {
+  async dispatch<Ev extends Event<{}>>(event: Ev) {
     const relevantSystems = this.systems.get(event.type);
-    relevantSystems?.forEach((sys)=>sys.execute(event, this));
+    if (!relevantSystems) { return; }
+    const executed: DirectedGraphNode<RegisteredSystem<Ev>>[] = [];
+    let available = relevantSystems.filter((v) => {
+      v.parents.length === 0;
+    });
+    while (executed.length < relevantSystems.length) {
+      if (available.length > 0) {
+        const executing = available;
+        available = [];
+        console.log('about to execute', executing);
+        executing.forEach((s) => {
+          console.log('executing');
+          this.runner(s.value.execute, event, this).then((res) => {
+            console.log('executed');
+            executed.push(s);
+            s.children.forEach((child) => {
+              const childNode = relevantSystems[child];
+              if (!childNode) {
+                throw new Error(`System ${s.value.execute.name} child system ${child} not found`);
+              }
+              available.push(childNode);
+            })
+          });
+        });
+      } else {
+        continue;
+      }
+    }
     return this;
   }
 }  

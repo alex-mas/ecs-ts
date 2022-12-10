@@ -29,3 +29,7 @@
  -  filterEntitiesByComponents now ignores undefined keys on the object.
  -  Added getComponents utility to retrieve components of the entity
  -  Ensures immutability of entities and provices mechanisms for updating the entities
+
+
+# 0.2.0 Changes
+  - Rewrite entity storage, now entities are just id pointers stored in components
