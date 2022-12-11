@@ -9,9 +9,9 @@ const mapSystemsToNodes = <T>(systems: System<T>[], graph: DirectedGraph<Registe
 type Dict<ValTyp = any> = {
   [key: string]: ValTyp
 }
-export type Component<Payload extends object = {}, EntityIdType =string> = 
+export type Component<Payload extends object = {}, EntityIdType extends string = string, CpType extends string = string> = 
   Payload & {
-    $$type: string,
+    $$type: CpType,
     $$entityId: EntityIdType
   }
 
@@ -31,13 +31,94 @@ export const defaultSystemRunner: SystemRunner = async<T>(system: System<T>, eve
   return 0;
 }
 
-export class World<CpType extends string = string>{
+export class World<CpType extends string = string, EId extends string = string>{
   runner: SystemRunner;
-  components: Map<CpType,Component<any>[]> = new Map();
+  components: Map<CpType, Map<EId, Component[]>> = new Map();
   systems: Map<string, DirectedGraph<RegisteredSystem<any>>> = new Map();
+  entityMap: Map<EId, Map<CpType, number>> = new Map();
   constructor(runner: SystemRunner = defaultSystemRunner) {
     this.runner = runner;
   }
+
+  registerTypes(componenType: CpType[]) {
+    componenType.forEach((cType) => {
+      this.registerType(cType);
+    })
+  }
+
+  registerType(componenType: CpType) {
+    this.components.set(componenType, new Map());
+    return this;
+  }
+  /**
+   * Expects the components Map to be initialized for the given component type, 
+   * otherwise this method will throw when trying to get the existing components of the owner entity
+   */
+  addComponent<CpPayload extends {}>(component: Component<CpPayload, EId, CpType>) {
+    const ownerId = component.$$entityId
+    const owner = this.entityMap.get(ownerId);
+    if (owner) {
+      const cpCount = owner.get(component.$$type);
+      if (cpCount) {
+        owner.set(component.$$type, cpCount + 1)
+      } else {
+        owner.set(component.$$type, 1)
+      }
+    } else {
+      const entries = new Map<CpType, number>();
+      entries.set(component.$$type, 1);
+      this.entityMap.set(ownerId, entries);
+    }
+
+    //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
+    const cpMap: Map<EId, Component[]> = this.components.get(component.$$type);
+
+    const cp = cpMap.get(ownerId);
+    if (cp) {
+      cp.push(component);
+    } else {
+      cpMap.set(ownerId, [component]);
+    }
+    return this;
+  }
+
+  /**
+ * Expects the components Map to be initialized for the given component types
+ * 
+ */
+  addEntity<CpPayload extends {}>(entityId: EId, components: Component<CpPayload, EId, CpType>[]) {
+    const cpTypes = new Map<CpType, number>();
+    components.forEach((cp) => {
+      cpTypes.set(cp.$$type, 0);
+      //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
+      const cpMap: Map<EId, Component[]> = this.components.get(cp.$$type);
+      const cpArr = cpMap.get(entityId);
+      if (cpArr) {
+        cpArr.push(cp);
+      } else {
+        cpMap.set(entityId, [cp]);
+      }
+    });
+    this.entityMap.set(entityId, cpTypes);
+  }
+
+  removeComponent<CpPayload extends {}>(component: Component<CpPayload, EId, CpType>) {
+    const owner = component.$$entityId;
+    const entityComponents = this.entityMap.get(owner);
+    //@ts-ignore
+    entityComponents.set(component.$$type, entityComponents.get(component.$$type) - 1);
+  }
+
+
+  removeEntity(entityId: EId) {
+    const cpTypes: Map<CpType, number> = this.entityMap.get(entityId) as unknown as Map<CpType, number>;
+    this.entityMap.delete(entityId);
+    cpTypes.forEach((_, type) => {
+      //@ts-ignore
+      this.components.get(type).delete()
+    })
+  }
+
   createEventChain(event: string) {
     const systemsGraph: DirectedGraph<RegisteredSystem<any>> = [];
     const chainCreator = {
@@ -102,10 +183,38 @@ export class World<CpType extends string = string>{
   }
 }  
 
-export const getEntity = (entityId: string,components: Map<string, Component[]>)=>{
-  const entity: Dict<Component[]>= {};
-  components.forEach((val,key)=>{
-    entity[key] = val.filter((cp)=>cp.$$entityId===entityId);
-  });
+export const getComponent = <CpId extends string, EId extends string>(entityId: EId, componentType: CpId, cpMap: World<CpId, EId>['components']) => {
+  //@ts-ignore
+  return cpMap.get(componentType).get(entityId);
+}
+
+export const getEntity = <CpId extends string, EId extends string>(entityId: EId, cpMap: World<CpId, EId>['components'], components?: CpId[]) => {
+  //@ts-ignore
+  const entity: { $$id: EId } & { [x in CpId]?: Component } = {
+    $$id: entityId
+  }
+  if (components) {
+    components.forEach((cp) => {
+      //@ts-ignore
+      entity[cp] = cpMap.get(cp).get(entityId);
+    });
+  } else {
+    cpMap.forEach((val, key) => {
+      //@ts-ignore
+      entity[key] = val.get(entityId);
+    });
+  }
   return entity;
+}
+
+export const queryEntities = <CpId extends string, EId extends string>(components: CpId[], world: World<CpId, EId>, getOtherComponents: boolean = false) => {
+  const entityIds: EId[] = [];
+  world.entityMap.forEach((val, key) => {
+    if (components.every((cp) => val.has(cp))) {
+      entityIds.push(key);
+    }
+  });
+  return entityIds.map((eid) => {
+    return getEntity(eid, world.components, getOtherComponents ? undefined : components);
+  });
 }
