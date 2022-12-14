@@ -1,7 +1,7 @@
 import { addNode, DirectedGraph, DirectedGraphNode } from "./graph";
 
 
-const mapSystemsToNodes = <T>(systems: System<T>[], graph: DirectedGraph<RegisteredSystem<T>>) => {
+const mapSystemsToNodes = <T, WorldType extends World<any, any>>(systems: System<T, WorldType>[], graph: DirectedGraph<RegisteredSystem<T, WorldType>>) => {
   return systems.map((s) => graph.findIndex((v) => v.value.execute === s))
 }
 
@@ -9,7 +9,7 @@ const mapSystemsToNodes = <T>(systems: System<T>[], graph: DirectedGraph<Registe
 type Dict<ValTyp = any> = {
   [key: string]: ValTyp
 }
-export type Component<Payload extends object = {}, EntityIdType extends string = string, CpType extends string = string> = 
+export type Component<Payload extends object = {}, EntityIdType extends (string | number) = string, CpType extends (string | number) = string> = 
   Payload & {
     $$type: CpType,
     $$entityId: EntityIdType
@@ -18,35 +18,35 @@ export type Component<Payload extends object = {}, EntityIdType extends string =
 export type Event<Payload extends object = any> = Payload & {
   type: string,
 }
-export type System<Ev extends Event> = (event: Ev, world: World) => void
+export type System<Ev extends Event, T extends World<any, any> = World> = (event: Ev, world: T) => void
 
-export type RegisteredSystem<Ev extends Event = Event<any>> = {
-  execute: System<Ev>
+export type RegisteredSystem<Ev extends Event = Event<any>, WorldType extends World<any, any> = World> = {
+  execute: System<Ev, WorldType>
 }
 
-export type SystemRunner = <T>(system: System<T>, event: T, world: World) => Promise<number>;
+export type SystemRunner = <T, CpType extends (string | number) = string, EId extends (string | number) = string>(system: System<T>, event: T, world: World<CpType, EId>) => Promise<number>;
 
-export const defaultSystemRunner: SystemRunner = async<T>(system: System<T>, event: T, world: World) => {
+export const defaultSystemRunner: SystemRunner = async<T>(system: System<T>, event: T, world: World<any, any>) => {
   system(event, world);
   return 0;
 }
 
-export class World<CpType extends string = string, EId extends string = string>{
+export class World<CpType extends (string | number) = string, EId extends (string | number) = string>{
   runner: SystemRunner;
   components: Map<CpType, Map<EId, Component[]>> = new Map();
-  systems: Map<string, DirectedGraph<RegisteredSystem<any>>> = new Map();
+  systems: Map<string, DirectedGraph<RegisteredSystem<any, World<CpType, EId>>>> = new Map();
   entityMap: Map<EId, Map<CpType, number>> = new Map();
   constructor(runner: SystemRunner = defaultSystemRunner) {
     this.runner = runner;
   }
 
-  registerTypes(componenType: CpType[]) {
+  registerComponentTypes(componenType: CpType[]) {
     componenType.forEach((cType) => {
-      this.registerType(cType);
+      this.registerComponentType(cType);
     })
   }
 
-  registerType(componenType: CpType) {
+  registerComponentType(componenType: CpType) {
     this.components.set(componenType, new Map());
     return this;
   }
@@ -71,7 +71,7 @@ export class World<CpType extends string = string, EId extends string = string>{
     }
 
     //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
-    const cpMap: Map<EId, Component[]> = this.components.get(component.$$type);
+    const cpMap: Map<EId, Component<CpPayload, EId, CpType>[]> = this.components.get(component.$$type);
 
     const cp = cpMap.get(ownerId);
     if (cp) {
@@ -91,7 +91,7 @@ export class World<CpType extends string = string, EId extends string = string>{
     components.forEach((cp) => {
       cpTypes.set(cp.$$type, 0);
       //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
-      const cpMap: Map<EId, Component[]> = this.components.get(cp.$$type);
+      const cpMap: Map<EId, Component<CpPayload, EId, CpType>[]> = this.components.get(cp.$$type);
       const cpArr = cpMap.get(entityId);
       if (cpArr) {
         cpArr.push(cp);
@@ -120,15 +120,15 @@ export class World<CpType extends string = string, EId extends string = string>{
   }
 
   createEventChain(event: string) {
-    const systemsGraph: DirectedGraph<RegisteredSystem<any>> = [];
+    const systemsGraph: DirectedGraph<RegisteredSystem<any, World<CpType, EId>>> = [];
     const chainCreator = {
-      addSystem: function <Ev extends Event>(sys: System<Ev>, dependsOn: System<Ev>[] = []) {
+      addSystem: function <Ev extends Event>(sys: System<Ev, World<CpType, EId>>, dependsOn: System<Ev, World<CpType, EId>>[] = []) {
         addNode({
           execute: sys
         }, mapSystemsToNodes(dependsOn, systemsGraph), systemsGraph);
         return this as typeof chainCreator;
       },
-      addSystems: function <Ev extends Event>(sys: System<Ev>[], dependsOn: System<Ev>[] = []) {
+      addSystems: function <Ev extends Event>(sys: System<Ev, World<CpType, EId>>[], dependsOn: System<Ev, World<CpType, EId>>[] = []) {
         sys.forEach((s) => {
           addNode({
             execute: s
@@ -136,7 +136,7 @@ export class World<CpType extends string = string, EId extends string = string>{
         })
         return this as typeof chainCreator;
       },
-      register: (): World<CpType> => {
+      register: (): World<CpType, EId> => {
         const existingSystems =this.systems.get(event);
         if(!existingSystems){
           this.systems.set(event, systemsGraph);
@@ -151,7 +151,7 @@ export class World<CpType extends string = string, EId extends string = string>{
   async dispatch<Ev extends Event<{}>>(event: Ev) {
     const relevantSystems = this.systems.get(event.type);
     if (!relevantSystems) { return; }
-    const executed: DirectedGraphNode<RegisteredSystem<Ev>>[] = [];
+    const executed: DirectedGraphNode<RegisteredSystem<Ev, World<CpType, EId>>>[] = [];
     let available = relevantSystems.filter((v) => {
       return v.parents.length === 0;
     });
@@ -161,7 +161,7 @@ export class World<CpType extends string = string, EId extends string = string>{
         available = [];
         const completed = await Promise.race(executing.map(async (s) => {
           try {
-            const res = await this.runner(s.value.execute, event, this)
+            const res = await this.runner(s.value.execute as any, event, this)
             executed.push(s);
             s.children.forEach((child) => {
               const childNode = relevantSystems[child];
@@ -183,12 +183,12 @@ export class World<CpType extends string = string, EId extends string = string>{
   }
 }  
 
-export const getComponent = <CpId extends string, EId extends string>(entityId: EId, componentType: CpId, cpMap: World<CpId, EId>['components']) => {
+export const getComponents = <CpId extends (string | number) = string, EId extends (string | number) = string>(entityId: EId, componentType: CpId, cpMap: World<CpId, EId>['components']) => {
   //@ts-ignore
   return cpMap.get(componentType).get(entityId);
 }
 
-export const getEntity = <CpId extends string, EId extends string>(entityId: EId, cpMap: World<CpId, EId>['components'], components?: CpId[]) => {
+export const getEntity = <CpId extends (string | number), EId extends (string | number)>(entityId: EId, cpMap: World<CpId, EId>['components'], components?: CpId[]) => {
   //@ts-ignore
   const entity: { $$id: EId } & { [x in CpId]?: Component } = {
     $$id: entityId
@@ -207,7 +207,7 @@ export const getEntity = <CpId extends string, EId extends string>(entityId: EId
   return entity;
 }
 
-export const queryEntities = <CpId extends string, EId extends string>(components: CpId[], world: World<CpId, EId>, getOtherComponents: boolean = false) => {
+export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>, getOtherComponents: boolean = false) => {
   const entityIds: EId[] = [];
   world.entityMap.forEach((val, key) => {
     if (components.every((cp) => val.has(cp))) {

@@ -1,4 +1,4 @@
-import { System, World } from "../src/ecs";
+import { getComponents, System, World } from "../src/ecs";
 
 const PERIODIC = 'periodic';
 const createPeriodicEvent = (dt: number) => {
@@ -6,25 +6,26 @@ const createPeriodicEvent = (dt: number) => {
 }
 type PeriodicEvent = ReturnType<typeof createPeriodicEvent>;
 
-let world = new World();
+let world = new World<string, number>();
 
 beforeEach(() => {
-  world = new World();
+  world = new World<string, number>();
+  world.registerComponentType('position');
 });
 
 
 
 test('Systems are added to the world properly when registering a chain', () => {
-  const aSystem: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
+  const aSystem: System<PeriodicEvent, World<string, number>> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as unknown as any;
     if(position){
-      position[0].x = 2;
+      position.x = 2;
     }
   };
-  const bSystem: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
+  const bSystem: System<PeriodicEvent, World<string, number>> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as unknown as any;
     if(position){
-      position[0].x = 3;
+      position.x = 3;
     }
   };
   world.createEventChain(PERIODIC)
@@ -36,10 +37,10 @@ test('Systems are added to the world properly when registering a chain', () => {
 
 
 test('Systems get properly executed when the appropiate event is dispatched', async () => {
-  const system: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
+  const system: System<PeriodicEvent, typeof world> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as unknown as any;
     if(position){
-      position[0].x += 1;
+      position.x += 1;
     }
   };
   const positionCp = {
@@ -47,7 +48,7 @@ test('Systems get properly executed when the appropiate event is dispatched', as
     $$entityId: 1,
     x: 0
   };
-  world.components.set('position', [positionCp]);
+  world.addComponent(positionCp);
   await world.createEventChain(PERIODIC)
     .addSystem(system, [])
     .register()
@@ -56,16 +57,16 @@ test('Systems get properly executed when the appropiate event is dispatched', as
 });
 
 test('Systems get executed respecting the priority', async () => {
-  const aSystem: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
-    if(position){
-      position[0].x = 2;
+  const aSystem: System<PeriodicEvent, World<string, number>> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as unknown as any;
+    if (position) {
+      position.x = 2;
     }
   };
-  const bSystem: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
-    if(position){
-      position[0].x = 3;
+  const bSystem: System<PeriodicEvent, World<string, number>> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as unknown as any;
+    if (position) {
+      position.x = 3;
     }
   };
   const positionCp = {
@@ -73,7 +74,7 @@ test('Systems get executed respecting the priority', async () => {
       $$entityId: 1,
       x: 0
     };
-  world.components.set('position', [positionCp]);
+  world.addComponent(positionCp);
   await world.createEventChain(PERIODIC)
     .addSystem(aSystem)
     .addSystem(bSystem)
@@ -83,10 +84,10 @@ test('Systems get executed respecting the priority', async () => {
 });
 
 test('Systems ignore events they were not registered for', async () => {
-  const system: System<PeriodicEvent> = ( event, world) => {
-    const position = world.components.get('position')
+  const system: System<PeriodicEvent, World<string, number>> = (event, world) => {
+    const [position] = getComponents(1, 'position', world.components) as any;
     if(position){
-      position[0].x = 2;
+      position.x = 2;
     }
   };
   const positionCp = {
@@ -94,7 +95,7 @@ test('Systems ignore events they were not registered for', async () => {
     $$entityId: 1,
     x: 0
   };
-  world.components.set('position', [positionCp]);
+  world.addComponent(positionCp);
   await world.createEventChain(PERIODIC)
     .addSystem(system)
     .register()
