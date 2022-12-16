@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "jest",
-    "docs": "typedoc src/ecs.ts",
+    "docs": "typedoc src/*",
     "build": "tsc"
   },
   "types": "bin/ecs.d.ts",
