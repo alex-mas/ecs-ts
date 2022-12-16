@@ -33,3 +33,5 @@
 
 # 0.2.0 Changes
   - Rewrite entity storage, now entities are just id pointers stored in components
+  - Add some data structures in the world storing references to speed up fetching operations
+  - Execution of systems for a given event now is a dependecy graph, system execution is async and a custom runner can be provided to allow parallelization among others
