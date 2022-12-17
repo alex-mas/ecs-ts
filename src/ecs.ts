@@ -38,7 +38,7 @@ export const defaultSystemRunner: SystemRunner =
         available = [];
         const completed = await Promise.race(executing.map(async (s) => {
           try {
-            const res = await s.value.execute(event, world);
+            const res = s.value.execute(event, world);
             executed.push(s);
             s.children.forEach((child) => {
               const childNode = systems[child];
@@ -61,7 +61,7 @@ export const defaultSystemRunner: SystemRunner =
 
 export class World<CpType extends (string | number) = string, EId extends (string | number) = string>{
   runner: SystemRunner<CpType, EId>;
-  components: Map<CpType, Map<EId, Component[]>> = new Map();
+  components: Map<CpType, Map<EId, Component<any, EId, CpType>[]>> = new Map();
   systems: Map<string, DirectedGraph<RegisteredSystem<any, World<CpType, EId>>>> = new Map();
   entityMap: Map<EId, Map<CpType, number>> = new Map();
   constructor(runner: SystemRunner<CpType, EId> = defaultSystemRunner) {
@@ -179,7 +179,7 @@ export class World<CpType extends (string | number) = string, EId extends (strin
   async dispatch<Ev extends Event<{}>>(event: Ev) {
     const relevantSystems = this.systems.get(event.type);
     if (!relevantSystems) { return; }
-    this.runner(relevantSystems, event, this);
+    await this.runner(relevantSystems, event, this);
     return this;
   }
 }  
@@ -193,6 +193,9 @@ export const getComponents =
   //@ts-ignore - we expect cp to be there
   return cpMap.get(componentType).get(entityId);
 }
+
+
+type ConstructedEntity<CpId extends (string | number), EId extends (string | number)> = { $$id: EId } & { [x in CpId]?: Component<any, EId, CpId>[] };
 
 export const getEntity = <CpId extends (string | number), EId extends (string | number)>(entityId: EId, cpMap: World<CpId, EId>['components'], components?: CpId[]) => {
   const entity: any = {
@@ -208,8 +211,12 @@ export const getEntity = <CpId extends (string | number), EId extends (string | 
       entity[key] = val.get(entityId);
     });
   }
-  return entity as { $$id: EId } & { [x in CpId]?: Component };
+  return entity as ConstructedEntity<CpId, EId>
 }
+
+
+export type QueryEntitiesFilter<CpId extends (string | number), EId extends (string | number)> =
+  (components: CpId[], world: World<CpId, EId>, getOtherComponents?: boolean) => ConstructedEntity<CpId, EId>
 
 export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>, getOtherComponents: boolean = false) => {
   const entityIds: EId[] = [];
