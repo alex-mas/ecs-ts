@@ -110,7 +110,6 @@ test('Get components performance', () => {
   const diff = Date.now() - before;
 
   console.log(`Mesured ms performance for 1M getComponents operations: ${diff}`);
-  expect(diff).toBeLessThan(100);
 });
 
 
@@ -126,7 +125,6 @@ test('query entities performance', () => {
   const diff = Date.now() - before;
 
   console.log(`Average ms performance for queryEntities operation: ${diff / 50}`);
-  expect(diff / 50).toBeLessThan(400);
 });
 
 test('query archetype performance', () => {
@@ -140,7 +138,6 @@ test('query archetype performance', () => {
   const diff = Date.now() - before;
 
   console.log(`Average ms performance for queryArchetype operation: ${diff / 50}`);
-  expect(diff / 50).toBeLessThan(400);
 });
 
 
