@@ -57,7 +57,6 @@ test('Adding components for entity', () => {
 
   const diff = Date.now() - before;
   console.log(`Mesured ms performance for 10M cp aditions to 1 entity: ${diff / 10000000}`);
-  expect(diff).toBeLessThan(1100);
 });
 
 
@@ -68,7 +67,6 @@ test('Adding components for new entities', () => {
   }
   const diff = Date.now() - before;
   console.log(`Mesured ms performance for 2M cp aditions: ${diff}`);
-  expect(diff).toBeLessThan(1500);
 });
 
 
@@ -83,7 +81,6 @@ test('Get entity performance', () => {
   const diff = Date.now() - before;
 
   console.log(`Mesured ms performance for 1M getEntity operations: ${diff}`);
-  expect(diff).toBeLessThan(500);
 });
 
 
@@ -98,7 +95,6 @@ test('Get entity specifying components performance', () => {
   const diff = Date.now() - before;
 
   console.log(`Mesured ms performance for 1M getEntity operations: ${diff}`);
-  expect(diff).toBeLessThan(500);
 });
 
 

@@ -5,10 +5,6 @@ const mapSystemsToNodes = <T, WorldType extends World<any, any>>(systems: System
   return systems.map((s) => graph.findIndex((v) => v.value.execute === s))
 }
 
-
-type Dict<ValTyp = any> = {
-  [key: string]: ValTyp
-}
 export type Component<Payload extends object = {}, EntityIdType extends (string | number) = string, CpType extends (string | number) = string> = 
   Payload & {
     $$type: CpType,
