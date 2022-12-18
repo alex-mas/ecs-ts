@@ -63,9 +63,20 @@ export class World<CpType extends (string | number) = string, EId extends (strin
   runner: SystemRunner<CpType, EId>;
   components: Map<CpType, Map<EId, Component<any, EId, CpType>[]>> = new Map();
   systems: Map<string, DirectedGraph<RegisteredSystem<any, World<CpType, EId>>>> = new Map();
-  entityMap: Map<EId, Map<CpType, number>> = new Map();
+  entityMap: Map<EId, CpType[]> = new Map();
+  archetypeMap: Map<CpType[], EId[]> = new Map();
   constructor(runner: SystemRunner<CpType, EId> = defaultSystemRunner) {
     this.runner = runner;
+  }
+
+  registerArchetype(componenTypes: CpType[]) {
+    this.archetypeMap.set(componenTypes, []);
+  }
+
+  registerArchetypes(archetypes: CpType[][]) {
+    archetypes.forEach((archetype) => {
+      this.registerArchetype(archetype);
+    })
   }
 
   registerComponentTypes(componenType: CpType[]) {
@@ -79,23 +90,29 @@ export class World<CpType extends (string | number) = string, EId extends (strin
     return this;
   }
   /**
-   * Expects the components Map to be initialized for the given component type, 
+   * Expects the components Map to be initialized for the given component type, and the entity to exist
    * otherwise this method will throw when trying to get the existing components of the owner entity
    */
   addComponent<CpPayload extends {}>(component: Component<CpPayload, EId, CpType>) {
-    const ownerId = component.$$entityId
-    const owner = this.entityMap.get(ownerId);
-    if (owner) {
-      const cpCount = owner.get(component.$$type);
-      if (cpCount) {
-        owner.set(component.$$type, cpCount + 1)
-      } else {
-        owner.set(component.$$type, 1)
+    const ownerId = component.$$entityId;
+
+    //get and remove previous archetype from entity
+    let previousArchetype = this.entityMap.get(ownerId) as CpType[] || [];
+    if (previousArchetype.length > 0) {
+      const previousArchetypeEntities = this.archetypeMap.get(previousArchetype) as EId[];
+      previousArchetypeEntities.splice(previousArchetypeEntities.indexOf(ownerId), 1);
+    }
+    //find and set new archetype
+    if (!previousArchetype.includes(component.$$type)) {
+      for (let [archetype, v] of this.archetypeMap) {
+        if (archetype.length === previousArchetype.length + 1 && archetype.every((v) => {
+          return v === component.$$type || previousArchetype.includes(v);
+        })) {
+          v.push(ownerId);
+          this.entityMap.set(ownerId, archetype);
+          break;
+        }
       }
-    } else {
-      const entries = new Map<CpType, number>();
-      entries.set(component.$$type, 1);
-      this.entityMap.set(ownerId, entries);
     }
 
     //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
@@ -114,10 +131,10 @@ export class World<CpType extends (string | number) = string, EId extends (strin
  * Expects the components Map to be initialized for the given component types
  * 
  */
-  addEntity<CpPayload extends {}>(entityId: EId, components: Component<CpPayload, EId, CpType>[]) {
-    const cpTypes = new Map<CpType, number>();
+  addEntity<CpPayload extends {}>(entityId: EId, components: Component<CpPayload, EId, CpType>[], archetype: CpType[]) {
+    const cpTypes = new Map<CpType, boolean>();
     components.forEach((cp) => {
-      cpTypes.set(cp.$$type, 0);
+      cpTypes.set(cp.$$type, true);
       //@ts-ignore -> cpMap is  expected to be defined, otherwise we will fail and throw, this way we don't waste time checking
       const cpMap: Map<EId, Component<CpPayload, EId, CpType>[]> = this.components.get(cp.$$type);
       const cpArr = cpMap.get(entityId);
@@ -127,7 +144,13 @@ export class World<CpType extends (string | number) = string, EId extends (strin
         cpMap.set(entityId, [cp]);
       }
     });
-    this.entityMap.set(entityId, cpTypes);
+    const savedArchetype = this.archetypeMap.get(archetype);
+    if (!savedArchetype) {
+      this.archetypeMap.set(archetype, [entityId]);
+    } else {
+      savedArchetype.push(entityId);
+    }
+    this.entityMap.set(entityId, archetype);
   }
 
   removeComponent<CpPayload extends {}>(component: Component<CpPayload, EId, CpType>) {
@@ -135,6 +158,18 @@ export class World<CpType extends (string | number) = string, EId extends (strin
     const entityComponents = this.entityMap.get(owner);
     //@ts-ignore
     entityComponents.set(component.$$type, entityComponents.get(component.$$type) - 1);
+
+    //remove entitiy from archetype
+    const archetype = this.entityMap.get(owner) as CpType[];
+    const archetypeEntities = this.archetypeMap.get(archetype) as EId[];
+    archetypeEntities.splice(archetypeEntities.indexOf(owner), 1);
+    //add it to new archetype
+    const newArchetype = archetype.filter((v) => v !== component.$$type);
+    this.archetypeMap.forEach((entities, aType) => {
+      if (newArchetype.every((v) => aType.includes(v))) {
+        entities.push(owner);
+      }
+    })
   }
 
 
@@ -218,14 +253,28 @@ export const getEntity = <CpId extends (string | number), EId extends (string | 
 export type QueryEntitiesFilter<CpId extends (string | number), EId extends (string | number)> =
   (components: CpId[], world: World<CpId, EId>, getOtherComponents?: boolean) => ConstructedEntity<CpId, EId>
 
-export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>, getOtherComponents: boolean = false) => {
-  const entityIds: EId[] = [];
-  world.entityMap.forEach((val, key) => {
-    if (components.every((cp) => val.has(cp))) {
-      entityIds.push(key);
+export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>) => {
+  let entityIds: EId[] = [];
+  world.archetypeMap.forEach((entities, archetype) => {
+    if (archetype === components || components.every((cpType) => archetype.includes(cpType))) {
+      entityIds = entityIds.concat(entities);
     }
-  });
+  })
+  let entities = Array(entityIds.length);
+  entityIds.forEach((eid) => {
+    return getEntity(eid, world.components);
+  })
+  return entities;
+}
+
+export const queryArchetype = <CpId extends (string | number), EId extends (string | number)>(archetype: CpId[], world: World<CpId, EId>) => {
+  let entityIds: EId[] = [];
+  world.archetypeMap.forEach((entities, aType) => {
+    if (aType === archetype || archetype.every((cpType) => aType.includes(cpType))) {
+      entityIds = entityIds.concat(entities);
+    }
+  })
   return entityIds.map((eid) => {
-    return getEntity(eid, world.components, getOtherComponents ? undefined : components);
+    return getEntity(eid, world.components, archetype);
   });
 }

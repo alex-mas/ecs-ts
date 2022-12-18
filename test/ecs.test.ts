@@ -8,9 +8,11 @@ type PeriodicEvent = ReturnType<typeof createPeriodicEvent>;
 
 let world = new World<string, number>();
 
+const positionArchetype = ['position'];
 beforeEach(() => {
   world = new World<string, number>();
   world.registerComponentType('position');
+  world.registerArchetype(positionArchetype)
 });
 
 
@@ -48,7 +50,7 @@ test('Systems get properly executed when the appropiate event is dispatched', as
     $$entityId: 1,
     x: 0
   };
-  world.addComponent(positionCp);
+  world.addEntity(1, [positionCp], positionArchetype);
   await world.createEventChain(PERIODIC)
     .addSystem(system, [])
     .register()
@@ -74,7 +76,7 @@ test('Systems get executed respecting the priority', async () => {
       $$entityId: 1,
       x: 0
     };
-  world.addComponent(positionCp);
+  world.addEntity(1, [positionCp], positionArchetype);
   await world.createEventChain(PERIODIC)
     .addSystem(aSystem)
     .addSystem(bSystem)
@@ -95,7 +97,7 @@ test('Systems ignore events they were not registered for', async () => {
     $$entityId: 1,
     x: 0
   };
-  world.addComponent(positionCp);
+  world.addEntity(1, [positionCp], positionArchetype);
   await world.createEventChain(PERIODIC)
     .addSystem(system)
     .register()

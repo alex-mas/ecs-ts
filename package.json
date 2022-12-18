@@ -9,7 +9,7 @@
     "url": "https://github.com/alex-mas/ecs-ts.git"
   },
   "scripts": {
-    "test": "jest",
+    "test": "set NODE_OPTIONS=--max_old_space_size=8192  &&  jest",
     "docs": "typedoc src/*",
     "build": "tsc"
   },
