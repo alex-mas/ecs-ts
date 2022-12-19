@@ -1,4 +1,4 @@
-import { getComponents, System, World } from "../src/ecs";
+import { getComponents, getEntity, queryEntities, regularSystem, System, World } from "../src/ecs";
 
 const PERIODIC = 'periodic';
 const createPeriodicEvent = (dt: number) => {
@@ -9,11 +9,50 @@ type PeriodicEvent = ReturnType<typeof createPeriodicEvent>;
 let world = new World<string, number>();
 
 const positionArchetype = ['position'];
+const healthArchetype = ['health'];
+const unitArchetype = ['health', 'position'];
 beforeEach(() => {
   world = new World<string, number>();
   world.registerComponentType('position');
-  world.registerArchetype(positionArchetype)
+  world.registerComponentType('health');
+  world.registerArchetype(positionArchetype);
+  world.registerArchetype(healthArchetype);
+  world.registerArchetype(unitArchetype);
 });
+
+
+const dataInit = () => {
+  const entity = [{
+    $$type: 'position',
+    $$entityId: 1,
+    x: 1
+  }, {
+    $$type: 'health',
+    $$entityId: 1,
+    x: 1
+  }];
+
+  const entity2 = [{
+    $$type: 'position',
+    $$entityId: 2,
+    x: 2
+  }, {
+    $$type: 'health',
+    $$entityId: 2,
+    x: 2
+  }];
+
+  const entity3 = [{
+    $$type: 'position',
+    $$entityId: 3,
+    x: 3
+  }];
+
+  world.addEntity(1, entity, unitArchetype);
+  world.addEntity(2, entity2, unitArchetype);
+  world.addEntity(2, entity3, positionArchetype);
+
+}
 
 
 
@@ -103,4 +142,66 @@ test('Systems ignore events they were not registered for', async () => {
     .register()
     .dispatch({ type: 'not periodic'});
   expect(positionCp.x).toBe(0);
+});
+
+test('getComponents returns the specified component from the entity', async () => {
+
+  dataInit();
+
+  const position1 = getComponents(1, 'position', world.components);
+  expect(position1).toBeDefined();
+  expect(position1?.length).toBe(1);
+  if (position1) {
+    expect(position1[0].x).toBe(1);
+  }
+});
+
+
+test('getEntity fetches all components owned by it', async () => {
+
+  dataInit();
+
+  const entity = getEntity(1, world.components);
+  expect(entity.$$id).toBe(1);
+  expect(entity.health).toBeDefined();
+  expect(entity.position).toBeDefined();
+});
+
+
+test('queryEntities filters entities properly', async () => {
+
+  dataInit();
+
+  const positionQuery = queryEntities(['position'], world);
+  const healthQuery = queryEntities(['health'], world);
+
+  expect(positionQuery.length).toBe(3);
+  expect(healthQuery.length).toBe(2);
+});
+
+
+test('queryActhetype filters entities properly', async () => {
+
+  dataInit();
+
+  const positionQuery = queryEntities(positionArchetype, world);
+  const healthQuery = queryEntities(healthArchetype, world);
+
+  expect(positionQuery.length).toBe(3);
+  expect(healthQuery.length).toBe(2);
+});
+
+
+
+
+test('regular system gives the appropiate entities', async () => {
+
+  dataInit();
+
+  world.createEventChain(PERIODIC)
+    .addSystem(regularSystem((e, entities, world) => {
+      expect(entities.length).toBe(3);
+    }, positionArchetype));
+
+  await world.dispatch(createPeriodicEvent(1000));
 });

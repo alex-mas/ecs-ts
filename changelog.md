@@ -39,3 +39,6 @@
 
 # 0.2.1 Changes
  - Add the archetype map to speed up getting entity components
+
+# 0.2.1 Changes
+- Add regularSystem back

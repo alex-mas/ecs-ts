@@ -274,3 +274,15 @@ export const queryArchetype = <CpId extends (string | number), EId extends (stri
     return getEntity(eid, world.components, archetype);
   });
 }
+
+export type RegularSystem<T extends Event, CpId extends (string | number), EId extends (string | number)> = (event: T, entities: ConstructedEntity<CpId, number>[], world: World<CpId, EId>) => void;
+
+export const regularSystem = <CpId extends (string | number), EId extends (string | number), EventType extends Event>(
+  system: RegularSystem<EventType, CpId, EId>,
+  components: CpId[],
+): System<EventType, World<CpId, EId>> => {
+  return (event, world) => {
+    const matchingEntities = queryEntities(components, world);
+    return system(event, matchingEntities, world);
+  }
+}
