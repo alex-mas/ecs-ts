@@ -120,7 +120,7 @@ test('query entities performance', () => {
   }
   const before = Date.now();
   for (let i = 0; i < 50; i++) {
-    const entities = queryEntities(unitArchetype, world);
+    const entities = queryEntities(healthArchetype, world);
   }
   const diff = Date.now() - before;
 
