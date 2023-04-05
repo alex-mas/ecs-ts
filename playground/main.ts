@@ -1,18 +1,23 @@
 import { World } from '../src/ecs';
 import { ComponentType } from './components/componentType';
-import { createDummy } from './entities/dummy';
+import { createDummy, DummyArchetype } from './entities/dummy';
 import { EventType } from './eventType';
 import { dummySystem } from './systems/dummySystem';
 
-const world: World = new World();
+const world = new World<ComponentType, string>();
 
+export type WorldType = World<ComponentType, string>;
 
-const [health1, attack1] = createDummy('1', 50, 10);
-const [health2, attack2] = createDummy('2', 50, 10);
+world.registerArchetype(DummyArchetype);
 
+const entity1Id = '1';
+const entity2Id = '2';
+const entity1 = createDummy(entity1Id, 50, 10);
+const entity2 = createDummy(entity2Id, 50, 10);
 
-world.components.set(ComponentType.HEALTH, [health1, health2]);
-world.components.set(ComponentType.ATTACK, [attack1, attack2]);
+world.addEntity(entity1Id, entity1, DummyArchetype);
+world.addEntity(entity2Id, entity2, DummyArchetype)
+
 
 world.createEventChain(EventType.PERIODIC).addSystem(dummySystem).register();
 

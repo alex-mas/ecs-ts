@@ -8,7 +8,7 @@ export interface AttackComponentData {
 export const createAttackComponent = (ownerId: string, ammount: number, speed: number) => {
   return {
     $$type: ComponentType.ATTACK,
-    $$ownerId: ownerId,
+    $$entityId: ownerId,
     ammount,
     speed
   }

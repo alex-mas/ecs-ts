@@ -8,7 +8,7 @@ export interface HealthComponentData {
 export const createHealthComponent = (ownerId: string, initial: number, maximum: number) => {
   return {
     $$type: ComponentType.HEALTH,
-    $$ownerId: ownerId,
+    $$entityId: ownerId,
     current: initial,
     maximum
   }
