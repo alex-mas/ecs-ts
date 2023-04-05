@@ -94,12 +94,12 @@ export class World<CpType extends (string | number) = string, EId extends (strin
 
     //get and remove previous archetype from entity
     let previousArchetype = this.entityMap.get(ownerId) as CpType[] || [];
-    if (previousArchetype.length > 0) {
-      const previousArchetypeEntities = this.archetypeMap.get(previousArchetype) as EId[];
-      previousArchetypeEntities.splice(previousArchetypeEntities.indexOf(ownerId), 1);
-    }
     //find and set new archetype
     if (!previousArchetype.includes(component.$$type)) {
+      const previousArchetypeEntities = this.archetypeMap.get(previousArchetype) as EId[];
+      if(previousArchetypeEntities){
+        previousArchetypeEntities.splice(previousArchetypeEntities.indexOf(ownerId), 1);
+      }
       for (let [archetype, v] of this.archetypeMap) {
         if (archetype.length === previousArchetype.length + 1 && archetype.every((v) => {
           return v === component.$$type || previousArchetype.includes(v);
@@ -124,7 +124,9 @@ export class World<CpType extends (string | number) = string, EId extends (strin
   }
 
   /**
- * Expects the components Map to be initialized for the given component types
+ * Expects the components Map to be initialized for the given component types, archetype is compared with reference equality
+ * to register the entity archetype relationship, therefore, it is expected for it to be the same array that defines the 
+ * desired archetype.
  * 
  */
   addEntity<CpPayload extends {}>(entityId: EId, components: Component<CpPayload, EId, CpType>[], archetype: CpType[]) {
@@ -151,16 +153,22 @@ export class World<CpType extends (string | number) = string, EId extends (strin
 
   removeComponent<CpPayload extends {}>(component: Component<CpPayload, EId, CpType>) {
     const owner = component.$$entityId;
-    const entityComponents = this.entityMap.get(owner);
+    const entityArchetype = this.entityMap.get(owner) as CpType[];
     //@ts-ignore
-    entityComponents.set(component.$$type, entityComponents.get(component.$$type) - 1);
+    entityArchetype.set(component.$$type, entityArchetype.get(component.$$type) - 1);
+    const currentCps = this.components.get(component.$$type)?.get(owner) as any[];
+
+    currentCps.splice(currentCps.indexOf(component),1);
+    //archetype doesn't change if we have more than one of the component type we're deleting
+    if(currentCps.length > 0) {
+      return;
+    }
 
     //remove entitiy from archetype
-    const archetype = this.entityMap.get(owner) as CpType[];
-    const archetypeEntities = this.archetypeMap.get(archetype) as EId[];
+    const archetypeEntities = this.archetypeMap.get(entityArchetype) as EId[];
     archetypeEntities.splice(archetypeEntities.indexOf(owner), 1);
     //add it to new archetype
-    const newArchetype = archetype.filter((v) => v !== component.$$type);
+    const newArchetype = entityArchetype.filter((v) => v !== component.$$type);
     this.archetypeMap.forEach((entities, aType) => {
       if (newArchetype.every((v) => aType.includes(v))) {
         entities.push(owner);
@@ -170,12 +178,15 @@ export class World<CpType extends (string | number) = string, EId extends (strin
 
 
   removeEntity(entityId: EId) {
-    const cpTypes: Map<CpType, number> = this.entityMap.get(entityId) as unknown as Map<CpType, number>;
+    const cpTypes = this.entityMap.get(entityId) as CpType[];
     this.entityMap.delete(entityId);
-    cpTypes.forEach((_, type) => {
+    cpTypes.forEach((type) => {
       //@ts-ignore
       this.components.get(type).delete()
-    })
+    });
+    const archetypeEntities = this.archetypeMap.get(cpTypes);
+    if(!archetypeEntities){return;}
+    archetypeEntities.splice(archetypeEntities.indexOf(entityId),1)
   }
 
   createEventChain(event: string) {
@@ -215,6 +226,11 @@ export class World<CpType extends (string | number) = string, EId extends (strin
   }
 }  
 
+
+/**
+ * 
+ *  Entity must be defined on the world, otherwise this function will throw
+ */
 export const getComponents =
   <
     CpId extends (string | number) = string,
@@ -225,6 +241,19 @@ export const getComponents =
   return cpMap.get(componentType).get(entityId);
 }
 
+/**
+ * 
+ *  Entity must be defined on the world, otherwise this function will throw
+ */
+export const getEntityComponent =
+<
+  CpId extends (string | number) = string,
+  EId extends (string | number) = string
+>
+  (entityId: EId, componentType: CpId, cpMap: World<CpId, EId>['components']) => {
+//@ts-ignore - we expect cp to be there
+return cpMap.get(componentType).get(entityId)[0];
+}
 
 type ConstructedEntity<CpId extends (string | number), EId extends (string | number)> = { $$id: EId } & { [x in CpId]?: Component<any, EId, CpId>[] };
 
@@ -234,12 +263,15 @@ export const getEntity = <CpId extends (string | number), EId extends (string | 
   }
   if (components) {
     components.forEach((cp) => {
-    //@ts-ignore - we expect cp to be there
+      //@ts-ignore - we expect cp and the entityId key to be there.
       entity[cp] = cpMap.get(cp).get(entityId);
     });
   } else {
     cpMap.forEach((val, key) => {
-      entity[key] = val.get(entityId);
+      const cps = val.get(entityId);
+      if(cps){
+        entity[key] = cps;
+      }
     });
   }
   return entity as ConstructedEntity<CpId, EId>
@@ -250,17 +282,14 @@ export type QueryEntitiesFilter<CpId extends (string | number), EId extends (str
   (components: CpId[], world: World<CpId, EId>, getOtherComponents?: boolean) => ConstructedEntity<CpId, EId>
 
 export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>) => {
-  let entityIds: EId[] = [];
-  world.archetypeMap.forEach((entities, archetype) => {
-    if (archetype === components || components.every((cpType) => archetype.includes(cpType))) {
-      entityIds = entityIds.concat(entities);
+  const constructedEntities: ConstructedEntity<CpId,EId>[] = [];
+  for(let [archetype, entities] of world.archetypeMap){
+    if (archetype !== components && components.some((cpType) => !archetype.includes(cpType))) { continue;}
+    for(let entityId of entities){
+      constructedEntities.push(getEntity(entityId,world.components));
     }
-  })
-  let entities = Array(entityIds.length);
-  entityIds.forEach((eid) => {
-    return getEntity(eid, world.components);
-  })
-  return entities;
+  }
+  return constructedEntities;
 }
 
 export const queryArchetype = <CpId extends (string | number), EId extends (string | number)>(archetype: CpId[], world: World<CpId, EId>) => {
@@ -275,7 +304,7 @@ export const queryArchetype = <CpId extends (string | number), EId extends (stri
   });
 }
 
-export type RegularSystem<T extends Event, CpId extends (string | number), EId extends (string | number)> = (event: T, entities: ConstructedEntity<CpId, number>[], world: World<CpId, EId>) => void;
+export type RegularSystem<T extends Event, CpId extends (string | number), EId extends (string | number)> = (event: T, entities: ConstructedEntity<CpId, EId>[], world: World<CpId, EId>) => void;
 
 export const regularSystem = <CpId extends (string | number), EId extends (string | number), EventType extends Event>(
   system: RegularSystem<EventType, CpId, EId>,
