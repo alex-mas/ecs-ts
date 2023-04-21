@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNEXT",                       
-    "module": "umd",                     
+    "module": "ES2022",                     
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "classic",
     "skipLibCheck": true,                   
     "esModuleInterop": true,
     "outDir": "bin",               
