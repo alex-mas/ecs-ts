@@ -42,3 +42,6 @@
 
 # 0.2.1 Changes
 - Add regularSystem back
+
+# 0.2.3 Changes
+- Fix default system executor infinite loop on certain cases

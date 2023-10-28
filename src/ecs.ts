@@ -1,4 +1,4 @@
-import { addNode, DirectedGraph, DirectedGraphNode } from "./graph";
+import { addNode, DirectedGraph } from "./graph";
 
 
 const mapSystemsToNodes = <T, WorldType extends World<any, any>>(systems: System<T, WorldType>[], graph: DirectedGraph<RegisteredSystem<T, WorldType>>) => {
@@ -24,33 +24,37 @@ export type SystemRunner<CpType extends (string | number) = string, EId extends 
 
 export const defaultSystemRunner: SystemRunner =
   async (systems, event, world) => {
-    const executed: DirectedGraphNode<RegisteredSystem<typeof event, typeof world>>[] = [];
     let available = systems.filter((v) => {
       return v.parents.length === 0;
     });
-    while (executed.length < systems.length) {
-      if (available.length > 0) {
-        const executing = available;
-        available = [];
-        const completed = await Promise.race(executing.map(async (s) => {
-          try {
-            const res = s.value.execute(event, world);
-            executed.push(s);
-            s.children.forEach((child) => {
-              const childNode = systems[child];
-              if (!childNode) {
-                throw new Error(`System ${s.value.execute.name} child system ${child} not found`);
-              }
-              available.push(childNode);
-            });
-            return res;
-          } catch (e) {
-            throw e;
-          }
-        }));
-      } else {
+    let executing: typeof available = [];
+
+    while (available.length > 0 || executing.length > 0) {
+      if (available.length === 0) {
         continue;
       }
+      const toExecute = available;
+      executing.push(...available);
+      available = [];
+      const completed = await Promise.allSettled(toExecute.map(async (s) => {
+        try {
+          const res = s.value.execute(event, world);
+          const execIndex = executing.indexOf(s);
+          if (execIndex >= 0) {
+            executing.splice(execIndex);
+          }
+          s.children.forEach((child) => {
+            const childNode = systems[child];
+            if (!childNode) {
+              throw new Error(`System ${s.value.execute.name} child system ${child} not found`);
+            }
+            available.push(childNode);
+          });
+          return res;
+        } catch (e) {
+          throw e;
+        }
+      }));
     }
     return 0;
   }

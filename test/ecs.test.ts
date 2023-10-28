@@ -70,7 +70,7 @@ test('Systems are added to the world properly when registering a chain', () => {
     }
   };
   world.createEventChain(PERIODIC)
-    .addSystem(aSystem, [])
+    .addSystem(aSystem)
     .addSystem(bSystem, [aSystem])
     .register();
   expect(world.systems.get(PERIODIC)?.length ).toBe(2);
