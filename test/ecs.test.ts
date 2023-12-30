@@ -1,10 +1,16 @@
 import { getComponents, getEntity, queryEntities, regularSystem, System, World } from "../src/ecs";
 
 const PERIODIC = 'periodic';
+
 const createPeriodicEvent = (dt: number) => {
   return { type: PERIODIC, stopped: false, dt };
 }
 type PeriodicEvent = ReturnType<typeof createPeriodicEvent>;
+const NON_PERIODIC = 'non_periodic';
+const createNonPeriodicEvent = (dt: number) => {
+  return { type:  NON_PERIODIC, stopped: false, dt };
+}
+type NonPeriodicEvent = ReturnType<typeof createNonPeriodicEvent>;
 
 let world = new World<string, number>();
 
@@ -204,4 +210,23 @@ test('regular system gives the appropiate entities', async () => {
     }, positionArchetype));
 
   await world.dispatch(createPeriodicEvent(1000));
+});
+
+
+test('systems execute without hanging', async () => {
+
+  dataInit();
+
+  const createSys = ()=>regularSystem((e, entities, world) => {
+    expect(entities.length).toBe(3);
+  }, positionArchetype) as any;
+
+ 
+  world.createEventChain(PERIODIC)
+    .addSystem(createSys())
+    .addSystem(createSys()).register().createEventChain(NON_PERIODIC).addSystem(createSys()).register();
+
+  await world.dispatch(createPeriodicEvent(1000));
+
+  expect(true).toBe(true);
 });

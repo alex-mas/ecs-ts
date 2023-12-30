@@ -1,6 +1,6 @@
 {
   "name": "@axc/ecs-ts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "",
   "main": "bin/ecs.js",
   "homepage": "https://github.com/alex-mas/ecs-ts",
