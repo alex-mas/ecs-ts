@@ -45,3 +45,6 @@
 
 # 0.2.3 Changes
 - Fix default system executor infinite loop on certain cases
+
+# 0.2.5 Changes
+- update dev dependencies
