@@ -1,6 +1,10 @@
 import { getComponents, getEntity, queryArchetype, queryEntities, World } from "../src/ecs";
 
+type TypeMap = {
+  ['health']: ReturnType<typeof createHealthComponent>;
+  ['position']:  ReturnType<typeof createPositionComponent>;
 
+}
 
 const PERIODIC = 'periodic';
 const createPeriodicEvent = (dt: number) => {
@@ -8,13 +12,13 @@ const createPeriodicEvent = (dt: number) => {
 }
 type PeriodicEvent = ReturnType<typeof createPeriodicEvent>;
 
-let world = new World<string, number>();
+let world = new World<'health'| 'position', number,TypeMap>();
 let components: any[] = [];
 
 const createPositionComponent = (eId: number) => {
   return {
     $$entityId: eId,
-    $$type: 'position',
+    $$type: 'position' as const,
     x: 0,
     y: 0
   }
@@ -28,11 +32,11 @@ const createHealthComponent = (eId: number) => {
 }
 
 
-const unitArchetype = ['health', 'position'];
-const healthArchetype = ['health'];
-const positionArchetype = ['position'];
+const unitArchetype= ['health', 'position'] as const satisfies string[];
+const healthArchetype = ['health']as const satisfies string[];
+const positionArchetype = ['position']as const satisfies string[];
 beforeEach(() => {
-  world = new World<string, number>();
+  world = new World<'health'| 'position', number,TypeMap>();
   world.registerComponentType('position');
   world.registerComponentType('health');
   world.registerArchetype(unitArchetype);

@@ -1,7 +1,7 @@
 import { addNode, DirectedGraph } from "./graph";
 
 
-const mapSystemsToNodes = <T, WorldType extends World<any, any>>(systems: System<T, WorldType>[], graph: DirectedGraph<RegisteredSystem<T, WorldType>>) => {
+const mapSystemsToNodes = <T, WorldType extends World<any, any,any>>(systems: System<T, WorldType>[], graph: DirectedGraph<RegisteredSystem<T, WorldType>>) => {
   return systems.map((s) => graph.findIndex((v) => v.value.execute === s))
 }
 
@@ -14,13 +14,13 @@ export type Component<Payload extends object = {}, EntityIdType extends (string 
 export type Event<Payload extends object = any> = Payload & {
   type: string,
 }
-export type System<Ev extends Event, T extends World<any, any> = World> = (event: Ev, world: T) => void
+export type System<Ev extends Event, T extends World<any, any,any> = World> = (event: Ev, world: T) => void
 
-export type RegisteredSystem<Ev extends Event = Event<any>, WorldType extends World<any, any> = World> = {
+export type RegisteredSystem<Ev extends Event = Event<any>, WorldType extends World<any, any,any> = World> = {
   execute: System<Ev, WorldType>
 }
 
-export type SystemRunner<CpType extends (string | number) = string, EId extends (string | number) = string> = <T>(system: DirectedGraph<RegisteredSystem<T, World<CpType, EId>>>, event: T, world: World<CpType, EId>) => Promise<number>;
+export type SystemRunner<CpType extends (string | number) = string, EId extends (string | number) = string,TypeMap extends {[P in CpType]: Component<any, EId, CpType>} = {[P in CpType]:Component<any, EId, CpType>}> = <T>(system: DirectedGraph<RegisteredSystem<T, World<CpType, EId, TypeMap>>>, event: T, world: World<CpType, EId,TypeMap>) => Promise<number>;
 
 export const defaultSystemRunner: SystemRunner =
   async (systems, event, world) => {
@@ -59,13 +59,22 @@ export const defaultSystemRunner: SystemRunner =
     return 0;
   }
 
-export class World<CpType extends (string | number) = string, EId extends (string | number) = string>{
-  runner: SystemRunner<CpType, EId>;
-  components: Map<CpType, Map<EId, Component<any, EId, CpType>[]>> = new Map();
-  systems: Map<string, DirectedGraph<RegisteredSystem<any, World<CpType, EId>>>> = new Map();
+
+
+
+interface ComponentMap<CpType extends (string | number),EId extends (string | number) = string, TypeMap extends {[P in CpType]: Component<any, EId, CpType>} = {[P in CpType]:Component<any, EId, CpType>}> extends Map<CpType,Map<EId,TypeMap[CpType][]>> {
+    get: <K extends (string | number)> (key: K)=> K extends CpType ? Map<EId,TypeMap[K][]> : undefined;
+}
+
+
+
+export class World<CpType extends (string | number) = string, EId extends (string | number) = string, TypeMap extends {[P in CpType]: Component<any, EId, CpType>} = {[P in CpType]:Component<any, EId, CpType>}>{
+  runner: SystemRunner<CpType, EId,TypeMap>;
+  components: ComponentMap<CpType,EId,TypeMap> = new Map();
+  systems:Map<string, DirectedGraph<RegisteredSystem<any, World<CpType, EId,TypeMap>>>> = new Map();
   entityMap: Map<EId, CpType[]> = new Map();
   archetypeMap: Map<CpType[], EId[]> = new Map();
-  constructor(runner: SystemRunner<CpType, EId> = defaultSystemRunner) {
+  constructor(runner: SystemRunner<CpType, EId,TypeMap> = defaultSystemRunner) {
     this.runner = runner;
   }
 
@@ -194,15 +203,15 @@ export class World<CpType extends (string | number) = string, EId extends (strin
   }
 
   createEventChain(event: string) {
-    const systemsGraph: DirectedGraph<RegisteredSystem<any, World<CpType, EId>>> = [];
+    const systemsGraph: DirectedGraph<RegisteredSystem<any, World<CpType, EId,TypeMap>>> = [];
     const chainCreator = {
-      addSystem: function <Ev extends Event>(sys: System<Ev, World<CpType, EId>>, dependsOn: System<Ev, World<CpType, EId>>[] = []) {
+      addSystem: function <Ev extends Event>(sys: System<Ev, World<CpType, EId,TypeMap>>, dependsOn: System<Ev, World<CpType, EId,TypeMap>>[] = []) {
         addNode({
           execute: sys
         }, mapSystemsToNodes(dependsOn, systemsGraph), systemsGraph);
         return this as typeof chainCreator;
       },
-      addSystems: function <Ev extends Event>(sys: System<Ev, World<CpType, EId>>[], dependsOn: System<Ev, World<CpType, EId>>[] = []) {
+      addSystems: function <Ev extends Event>(sys: System<Ev, World<CpType, EId,TypeMap>>[], dependsOn: System<Ev, World<CpType, EId,TypeMap>>[] = []) {
         sys.forEach((s) => {
           addNode({
             execute: s
@@ -210,7 +219,7 @@ export class World<CpType extends (string | number) = string, EId extends (strin
         })
         return this as typeof chainCreator;
       },
-      register: (): World<CpType, EId> => {
+      register: (): World<CpType, EId,TypeMap> => {
         const existingSystems =this.systems.get(event);
         if(!existingSystems){
           this.systems.set(event, systemsGraph);
@@ -259,9 +268,9 @@ export const getEntityComponent =
 return cpMap.get(componentType).get(entityId)[0];
 }
 
-type ConstructedEntity<CpId extends (string | number), EId extends (string | number)> = { $$id: EId } & { [x in CpId]?: Component<any, EId, CpId>[] };
+type ConstructedEntity<CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}> = { $$id: EId } & { [x in CpId]?: TypeMap[x][] };
 
-export const getEntity = <CpId extends (string | number), EId extends (string | number)>(entityId: EId, cpMap: World<CpId, EId>['components'], components?: CpId[]) => {
+export const getEntity = <CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}>(entityId: EId, cpMap: World<CpId, EId,TypeMap>['components'], components?: CpId[]) => {
   const entity: any = {
     $$id: entityId
   }
@@ -282,10 +291,10 @@ export const getEntity = <CpId extends (string | number), EId extends (string | 
 }
 
 
-export type QueryEntitiesFilter<CpId extends (string | number), EId extends (string | number)> =
-  (components: CpId[], world: World<CpId, EId>, getOtherComponents?: boolean) => ConstructedEntity<CpId, EId>
+export type QueryEntitiesFilter<CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}> =
+  (components: CpId[], world: World<CpId, EId>, getOtherComponents?: boolean) => ConstructedEntity<CpId, EId,TypeMap>
 
-export const queryEntities = <CpId extends (string | number), EId extends (string | number)>(components: CpId[], world: World<CpId, EId>) => {
+export const queryEntities = <CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}>(components: CpId[], world: World<CpId, EId,TypeMap>) => {
   const constructedEntities: ConstructedEntity<CpId,EId>[] = [];
   for(let [archetype, entities] of world.archetypeMap){
     if (archetype !== components && components.some((cpType) => !archetype.includes(cpType))) { continue;}
@@ -296,7 +305,7 @@ export const queryEntities = <CpId extends (string | number), EId extends (strin
   return constructedEntities;
 }
 
-export const queryArchetype = <CpId extends (string | number), EId extends (string | number)>(archetype: CpId[], world: World<CpId, EId>) => {
+export const queryArchetype = <CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}>(archetype: CpId[], world: World<CpId, EId,TypeMap>) => {
   let entityIds: EId[] = [];
   world.archetypeMap.forEach((entities, aType) => {
     if (aType === archetype || archetype.every((cpType) => aType.includes(cpType))) {
@@ -308,12 +317,12 @@ export const queryArchetype = <CpId extends (string | number), EId extends (stri
   });
 }
 
-export type RegularSystem<T extends Event, CpId extends (string | number), EId extends (string | number)> = (event: T, entities: ConstructedEntity<CpId, EId>[], world: World<CpId, EId>) => void;
+export type RegularSystem<T extends Event, CpId extends (string | number), EId extends (string | number),TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}> = (event: T, entities: ConstructedEntity<CpId, EId>[], world: World<CpId, EId,TypeMap>) => void;
 
-export const regularSystem = <CpId extends (string | number), EId extends (string | number), EventType extends Event>(
-  system: RegularSystem<EventType, CpId, EId>,
+export const regularSystem = <CpId extends (string | number), EId extends (string | number), EventType extends Event,TypeMap extends {[P in CpId]: Component<any, EId, CpId>} = {[P in CpId]:Component<any, EId, CpId>}>(
+  system: RegularSystem<EventType, CpId, EId,TypeMap>,
   components: CpId[],
-): System<EventType, World<CpId, EId>> => {
+): System<EventType, World<CpId, EId,TypeMap>> => {
   return (event, world) => {
     const matchingEntities = queryEntities(components, world);
     return system(event, matchingEntities, world);

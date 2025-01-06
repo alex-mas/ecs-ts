@@ -48,3 +48,6 @@
 
 # 0.2.5 Changes
 - update dev dependencies
+
+# 0.2.6 Changes
+- Provide TypeMap generic argument for World to better narrow types of components
