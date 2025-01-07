@@ -52,7 +52,8 @@ beforeEach(() => {
 });
 
 
-test('Adding components for entity', () => {
+test('Adding components for entity', () => {    
+  world.addEntity(0,[],[]);
   const before = Date.now();
   for (let i = 0; i < 10000000; i++) {
     const cp = createPositionComponent(0);
@@ -67,6 +68,9 @@ test('Adding components for entity', () => {
 test('Adding components for new entities', () => {
   const before = Date.now();
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const diff = Date.now() - before;
@@ -76,11 +80,14 @@ test('Adding components for new entities', () => {
 
 test('Get entity performance', () => {
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const before = Date.now();
   for (let i = 0; i < 1000000; i++) {
-    const entity = getEntity(i, world.components);
+    const entity = getEntity(i, world);
   }
   const diff = Date.now() - before;
 
@@ -90,11 +97,14 @@ test('Get entity performance', () => {
 
 test('Get entity specifying components performance', () => {
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const before = Date.now();
   for (let i = 0; i < 1000000; i++) {
-    const entity = getEntity(i, world.components, positionArchetype);
+    const entity = getEntity(i, world, positionArchetype);
   }
   const diff = Date.now() - before;
 
@@ -105,6 +115,9 @@ test('Get entity specifying components performance', () => {
 
 test('Get components performance', () => {
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const before = Date.now();
@@ -120,6 +133,9 @@ test('Get components performance', () => {
 
 test('query entities performance', () => {
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const before = Date.now();
@@ -133,6 +149,9 @@ test('query entities performance', () => {
 
 test('query archetype performance', () => {
   for (let cp of components) {
+    if(!world.entityMap.get(cp.$$entityId)){
+      world.addEntity(cp.$$entityId,[],[]);
+    }
     world.addComponent(cp);
   }
   const before = Date.now();

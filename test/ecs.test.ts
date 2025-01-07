@@ -167,7 +167,7 @@ test('getEntity fetches all components owned by it', async () => {
 
   dataInit();
 
-  const entity = getEntity(1, world.components);
+  const entity = getEntity(1, world);
   expect(entity.$$id).toBe(1);
   expect(entity.health).toBeDefined();
   expect(entity.position).toBeDefined();

@@ -51,3 +51,4 @@
 
 # 0.2.6 Changes
 - Provide TypeMap generic argument for World to better narrow types of components
+- Breaking: getEntity takes the ecs world instead of only the components map
